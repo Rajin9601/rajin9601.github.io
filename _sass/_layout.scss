@@ -431,6 +431,14 @@
                 color: $grey-color;
             }
         }
+
+        @include media-query($on-palm) {
+            height: 150px;
+
+            .post-info-white, .post-info-black{
+                padding: 10px 20px;
+            }
+        }
     }
 
 }
