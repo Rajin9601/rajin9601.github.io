@@ -71,6 +71,15 @@ figcaption {
     color: $grey-color;
 }
 
+figure .embed_wrapper iframe {
+    width: 640px;
+    @include media-query($on-laptop) {
+        width: 400px;
+    }
+    @include media-query($on-palm) {
+        width: 200px;
+    }
+}
 
 
 /**
