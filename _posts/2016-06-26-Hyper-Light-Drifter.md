@@ -6,6 +6,7 @@ categories: game
 cover-img: "/image/hyper_light_drifter/cover-img.jpg"
 img-overlay: 0.1
 item-black: false
+comments: true
 ---
 
 Hyper Light Drifter는 예전에 reddit/gaming에서 봤던 게임이였다. 그 때 당시에는 개발 중이라는 글이였는데, 짧은 동영상으로 진짜 말도 안되게 예쁜 픽셀 아트와 함께 대시 기술을 주 기술로 삼아 빠른 액션감을 보여주었다. 그 이후로 한동안 잊고 있다가, 출시됬다는 사실을 알게 되었고 친구가 선물로 줘서 시험 끝나자 마자 플레이를 시작했다.

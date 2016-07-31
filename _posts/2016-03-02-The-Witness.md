@@ -6,6 +6,7 @@ categories: game
 cover-img: "/image/the_witness/cover-img.jpg"
 img-overlay: 0.1
 item-black: false
+comments: true
 ---
 
 Jonathan Blow는 유명한 인디게임인 ‘Braid’를 만든 게임 디자이너이자 프로그래머이다. 개인적으로 좋아하는 사람이여서 가끔 그의 트위터에 들어가 보는데, 그의 두 번째 게임인 The Witness가 출시한다는 소식을 보고, 정가인 43000원을 주고 샀다.
