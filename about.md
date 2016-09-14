@@ -4,7 +4,7 @@ title: About
 permalink: /about/
 ---
 
-내가 만들고 싶은 것을 만드는 사람.
+만들고 싶은 것을 만드는 사람.
 
 {% include icon-github.html username=site.github_username %}
 
@@ -21,5 +21,6 @@ permalink: /about/
 - 2015/06 : Amormio 첫 방문
 - 2015/07 : 첫 인턴
 - 2016/04 : 블로그 만듬
+- 2016/09 : 첫 게임 페스티벌 전시
 - 2016/?? : What's Next
 
