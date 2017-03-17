@@ -1,0 +1,46 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+/**
+ * Ony for Resume page
+ */
+
+article.resume {
+    padding-top: 30px;
+}
+
+sub, sup {
+    color: gray;
+}
+
+#resume-header {
+    height: 180px;
+    width: 100%;
+    #profile {
+        height: 150px;
+        width: 150px;
+        background: url("/image/resume/profile.jpg") no-repeat center center;
+        background-size: cover;
+        float: left;
+        margin-right: 30px;
+        margin-top: 12px;
+    }
+    #info {
+        float: left;
+        height: 100%;
+        width: calc(100%-180px);
+        padding-top: 8px;
+        box-sizing: border-box;
+        #info-name {
+            font-size: 28px;
+            font-weight: 200;
+            sup {
+                font-size: 20px;
+            }
+        }
+        #status {
+            color: gray;
+        }
+    }
+
+}
