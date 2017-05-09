@@ -1,5 +1,12 @@
 article.resume {
     padding-top: 30px;
+    a {
+        text-decoration: underline;
+    }
+}
+
+body {
+    font-size: 15px;
 }
 
 sub, sup {
@@ -9,6 +16,9 @@ sub, sup {
 #resume-header {
     height: 180px;
     width: 100%;
+    a {
+        text-decoration: none;
+    }
     #profile {
         height: 150px;
         width: 150px;

@@ -23,9 +23,25 @@ permalink: /resume/
 * Gyeong-gi Science High School <sup>2011 - 2014</sup>
 * Seoul National University, Majoring in Computer Science and Enginerring <sup>2014 - ...</sup>
 
+### Courses
+
+* Theory and Formal Thinking
+    * Algorithm, Data Structure
+    * Programming Language, Automata, Programming Principle
+* Systems and Hardware
+    * Computer Architecture, System Programming, OS
+    * DB, Advanced DB
+* Application
+    * Computer Graphics, Intro. to Machine Learning, Intro. to Data Mining
+* Others
+    * Serious Game, Understanding of Game, Typography
+
+
 ## Experience
 * Internship at Ultracaption. Developing iOS Application for PLAIN <sup>2015.07 - 08</sup>
+    * Used Objective-C and Swift, developed Today-Extension.
 * Internship at 42 Company. Developing Contents Crawler for Slide <sup>2016.12 - 2017.1</sup>
+    * Used Ruby on Rails(Active Admin), AngularJS, PhantomJS.
 
 ## Awards and Honors
 
@@ -38,22 +54,25 @@ permalink: /resume/
 ## Skill Set
 
 * Problem Solving
-    * Once Enthusiastic about Informatics Olympiad in High School  
+    * Once Enthusiastic about Informatics Olympiad <sup>High School</sup>
     * [Codeforce Profile](http://codeforces.com/profile/RaJin)
-    * Now focusing on Development, not problem solving.
+    * Now focusing on Development
 * Web
     * Backend
         * Ruby on rails <sup>Active Admin</sup>
-        * node.js <sup>express</sup>
+        * node.js <sup>express, socket.io</sup>
     * Frontend
-        * SASS, Webpack, Babel 
+        * SASS, Webpack, Babel
         * React, Flux <sup>Only basics</sup>
+        * D3 <sup>HCI</sup>
+        * CSS Framework <sup>Bulma</sup>
 * App Development
     * iOS
         * Swift <sup>Main Language</sup>
         * Objective-C <sup>Only basics</sup>
 * Computer Graphics
     * [Computer Graphics course in SNU](http://mrl.snu.ac.kr/courses/CourseGraphics/index_2015spring.html)
+    * [Depth ordering with BST](http://mrl.snu.ac.kr/courses/CourseGraphics/index_2015spring.html) [Image link](http://mrl.snu.ac.kr/courses/CourseGraphics/2015spring/best/4/KJH.png)
     * Made a ray-tracing renderer
 * Game Development
     * Unity
@@ -66,23 +85,24 @@ permalink: /resume/
 
 ## Projects
 
-#### Timetable Generating Program
+### Timetable Generating Program
 
 * Timetable generating program for Gyeonggi Science High School <sup>Team of 2 person</sup>
-* Sheduling problem based on Post-enrollment, including student sectioning problem
+* Scheduling problem based on Post-enrollment, including student sectioning problem
 * Our Solution
     * FP-Tree <sup>Initial student sectioning</sup>
     * Multi-stage metaheuristic search algorithms <sup>Optimization</sup>
     * Implemented a real-working program <sup>Java</sup>
 
-#### SNUTT <sup>Coming soon</sup>
+### SNUTT v2 <sup>Coming soon</sup>
 
 {% include image-fig.html src="/image/resume/snutt-ios.png" alt="SNUTT iOS App" %}
 
-* As a team leader, leaded the team from product design, system design to actual launching.
-* In charge of iOS App development and UI design since there was no designer in the team.
+* Develop in ~~Swift 2~~ (ported to Swift 3) [github](https://github.com/wafflestudio/SNUTT-iOS)
+* As a team leader, leading the team from product design, system design to actual launching.
+* In charge of iOS App development and ~~UI design since there was no designer in the team~~ (a designer joined)
 
-#### 21 Days <sup>Coming soon</sup>
+### 21 Days <sup>Coming soon</sup>
 
 <figure markdown="1">
 <iframe width="560" height="315" src="https://www.youtube.com/embed/WnOAGWaGOEU" frameborder="0" allowfullscreen></iframe>
@@ -98,3 +118,17 @@ permalink: /resume/
 * Awards and Honor
     * Finalist in Excellence in Narrative <sup>BIC Festival, 2016</sup>
     * Greenlit in Steam
+
+### Others
+
+* Blog
+    * based on jekyll
+    * [Design and customized from the jekyll default.](http://rajin9601.github.io/dev/life/2016/04/29/블로그-시작.html)
+* SNUTT v1 maintenance <sup>2014 - ...</sup>
+    * [Currently in service](http://snutt.kr)
+    * [github](https://github.com/wafflestudio/snutt)
+* Kumiho <sup>private</sup>
+
+    <img src="/image/resume/kumiho.png" alt="Kumiho game Screenshot" style="width: 500px;"/>
+    * 2D Platformer Adventure game
+    * Basic Animator with sprite
