@@ -102,11 +102,13 @@ permalink: /resume/
 * As a team leader, leading the team from product design, system design to actual launching.
 * In charge of iOS App development and ~~UI design since there was no designer in the team~~ (a designer joined)
 
-### 21 Days <sup>Coming soon</sup>
+### 21 Days <sup>In Steam</sup>
 
 <figure markdown="1">
 <iframe width="560" height="315" src="https://www.youtube.com/embed/WnOAGWaGOEU" frameborder="0" allowfullscreen></iframe>
 </figure>
+
+[Link to Steam Page](http://store.steampowered.com/app/607660/21_Days/)
 
 * Started as SNU's course's final project <sup>게임의 이해</sup>
     * Syrian Refugee Simulator <sup>Serious Game</sup>
