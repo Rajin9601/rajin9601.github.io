@@ -228,3 +228,20 @@ pre {
         }
     }
 }
+
+
+/**
+ * Footnotes
+ */
+
+.footnotes {
+    border-top: 1px black solid;
+    margin-top: 10px;
+    padding: 20px 0 20px 0;
+    li {
+        font-size: $small-font-size;
+        p {
+            margin-bottom: 0px;
+        }
+    }
+}
