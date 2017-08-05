@@ -51,12 +51,21 @@ img {
     vertical-align: middle;
 }
 
+video {
+    max-width: 100%;
+}
+
 
 
 /**
  * Figures
  */
 figure img {
+    display: inline-block;
+    max-height: 450px;
+}
+
+figure video {
     display: inline-block;
     max-height: 450px;
 }
