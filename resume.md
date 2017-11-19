@@ -38,10 +38,11 @@ permalink: /resume/
 
 
 ## Experience
-* Internship at Ultracaption. Developing iOS Application for PLAIN <sup>2015.07 - 08</sup>
-    * Used Objective-C and Swift, developed Today-Extension.
+* Android Programmer at VCNC. Developing Android Application for Between <sup>2017.7 - </sup>
 * Internship at 42 Company. Developing Contents Crawler for Slide <sup>2016.12 - 2017.1</sup>
     * Used Ruby on Rails(Active Admin), AngularJS, PhantomJS.
+* Internship at Ultracaption. Developing iOS Application for PLAIN <sup>2015.07 - 08</sup>
+    * Used Objective-C and Swift, developed Today-Extension.
 
 ## Awards and Honors
 
