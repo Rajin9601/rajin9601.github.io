@@ -58,31 +58,29 @@ permalink: /resume/
     * Once Enthusiastic about Informatics Olympiad <sup>High School</sup>
     * [Codeforce Profile](http://codeforces.com/profile/RaJin)
     * Now focusing on Development
-* Web
-    * Backend
-        * Ruby on rails <sup>Active Admin</sup>
-        * node.js <sup>express, socket.io</sup>
-    * Frontend
-        * SASS, Webpack, Babel
-        * React, Flux <sup>Only basics</sup>
-        * D3 <sup>HCI</sup>
-        * CSS Framework <sup>Bulma</sup>
 * App Development
+    * Android
+        * Android Programmer in VCNC.
+        * Java
     * iOS
         * Swift <sup>Main Language</sup>
         * Objective-C <sup>Only basics</sup>
-* Computer Graphics
-    * [Computer Graphics course in SNU](http://mrl.snu.ac.kr/courses/CourseGraphics/index_2015spring.html)
-    * [Depth ordering with BST](http://mrl.snu.ac.kr/courses/CourseGraphics/index_2015spring.html) [Image link](http://mrl.snu.ac.kr/courses/CourseGraphics/2015spring/best/4/KJH.png)
-    * Made a ray-tracing renderer
 * Game Development
     * Unity
         * Main programmer in [21 Days](http://steamcommunity.com/sharedfiles/filedetails/?id=800257717)
         <sup>Sprite based 2D, self-developed dialogue tools</sup>
         * Main Programmer in Kumiho <sup>Team project in SNU, Serious game</sup>
-* Database
-    * SQL <sup>Hibernate</sup>
-    * Mongodb <sup>mongoose</sup>
+* Web
+    * Backend
+        * Ruby on rails <sup>Active Admin</sup>
+        * node.js <sup>express, socket.io</sup>
+    * Frontend
+        * D3 <sup>[HCI Project](https://github.com/snuhci2017/PopulationSimulation)</sup>
+        * SASS, Webpack, Babel, React, Flux <sup>Only basics</sup>
+* Computer Graphics
+    * [Computer Graphics course in SNU](http://mrl.snu.ac.kr/courses/CourseGraphics/index_2015spring.html)
+    * [Depth ordering with BST](http://mrl.snu.ac.kr/courses/CourseGraphics/index_2015spring.html) [Image link](http://mrl.snu.ac.kr/courses/CourseGraphics/2015spring/best/4/KJH.png)
+    * Made a ray-tracing renderer
 
 ## Projects
 
@@ -95,13 +93,15 @@ permalink: /resume/
     * Multi-stage metaheuristic search algorithms <sup>Optimization</sup>
     * Implemented a real-working program <sup>Java</sup>
 
-### SNUTT v2 <sup>Coming soon</sup>
+### SNUTT v2
 
 {% include image-fig.html src="/image/resume/snutt-ios.png" alt="SNUTT iOS App" %}
 
+[Link to AppStore](https://itunes.apple.com/kr/app/snutt-서울대학교-시간표-앱/id1215668309?mt=8)
+
 * Develop in ~~Swift 2~~ (ported to Swift 3) [github](https://github.com/wafflestudio/SNUTT-iOS)
 * As a team leader, leading the team from product design, system design to actual launching.
-* In charge of iOS App development and ~~UI design since there was no designer in the team~~ (a designer joined)
+* In charge of iOS App development and ~~UI design since there was no designer in the team~~ (a designer has joined)
 
 ### 21 Days <sup>In Steam</sup>
 
@@ -128,7 +128,7 @@ permalink: /resume/
     * based on jekyll
     * [Design and customized from the jekyll default.](http://rajin9601.github.io/dev/life/2016/04/29/블로그-시작.html)
 * SNUTT v1 maintenance <sup>2014 - ...</sup>
-    * [Currently in service](http://snutt.kr)
+    * [Currently in service](http://old.snutt.kr)
     * [github](https://github.com/wafflestudio/snutt)
 * Kumiho <sup>private</sup>
 
