@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Zelda: Breath of the Wild"
-date:   2018-02-14 23:18:00 +0900
+date:   2018-02-20 23:00:00 +0900
 categories: game
 cover-img: "/image/zelda_botw/cover-img.jpg"
 img-overlay: 0.1
