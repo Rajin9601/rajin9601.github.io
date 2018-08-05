@@ -12,6 +12,7 @@ email: rajin9601@gmail.com
 description: >
   만들고 싶은 것을 만드는 사람.
 baseurl: "" # the subpath of your site, e.g. /blog
+urlForDisqus: "https://www.rajin.me"
 github_username: rajin9601
 twitter_username: rajin9601
 
