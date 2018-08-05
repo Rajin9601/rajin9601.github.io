@@ -35,7 +35,7 @@ body {
  */
 h1, h2, h3, h4, h5, h6,
 p, blockquote, pre,
-ul, ol, dl, figure,
+ul, ol, dl, figure, table,
 %vertical-rhythm {
     margin-bottom: $spacing-unit / 2;
 }
@@ -180,6 +180,36 @@ pre {
         border: 0;
         padding-right: 0;
         padding-left: 0;
+    }
+}
+
+
+
+/**
+ * Table
+ */
+
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    border-bottom: 1px solid $grey-color-light;
+    border-right: 1px solid $grey-color-light;
+    padding-right: 15px;
+    padding-left: 15px;
+
+    &:last-child {
+        border-right: 0px
+    }
+}
+
+.table-equal-col-2 {
+    table {
+        width: 100%
+    }
+    th, td {
+        width: 50%
     }
 }
 

@@ -7,35 +7,37 @@ layout: default
 
         <ul class="post-list">
             {% for post in site.posts %}
-            <li>
+                {% unless post.draft %}
+                <li>
 
-                <div class="post-list-item">
-                {% if post.cover-img %}
-                    <img class = "cover-img" src="{{post.cover-img}}" >
-                    <div class="black-overlay"
-                    style="background-color:rgba(0,0,0,{{post.img-overlay}})"></div>
-                {% else %}
-                    <div class="post-cover-pattern"> </div>
-                {% endif %}
+                    <div class="post-list-item">
+                    {% if post.cover-img %}
+                        <img class = "cover-img" src="{{post.cover-img}}" >
+                        <div class="black-overlay"
+                        style="background-color:rgba(0,0,0,{{post.img-overlay}})"></div>
+                    {% else %}
+                        <div class="post-cover-pattern"> </div>
+                    {% endif %}
 
-                {% if post.item-black == false %}
-                    <div class="post-info-white">
-                    <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-                    <h2>
-                        <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-                    </h2>
+                    {% if post.item-black == false %}
+                        <div class="post-info-white">
+                        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+                        <h2>
+                            <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+                        </h2>
+                        </div>
+                    {% else %}
+                        <div class="post-info-black">
+                        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+                        <h2>
+                            <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+                        </h2>
+                        </div>
+                    {% endif %}
+
                     </div>
-                {% else %}
-                    <div class="post-info-black">
-                    <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-                    <h2>
-                        <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-                    </h2>
-                    </div>
-                {% endif %}
-
-                </div>
-            </li>
+                </li>
+                {% endunless %}
             {% endfor %}
         </ul>
 </div>
