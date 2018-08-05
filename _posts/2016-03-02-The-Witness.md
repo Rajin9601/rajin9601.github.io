@@ -12,7 +12,7 @@ comments: true
 Jonathan Blow는 유명한 인디게임인 ‘Braid’를 만든 게임 디자이너이자 프로그래머이다. 개인적으로 좋아하는 사람이여서 가끔 그의 트위터에 들어가 보는데, 그의 두 번째 게임인 The Witness가 출시한다는 소식을 보고, 정가인 43000원을 주고 샀다.
 
 <figure markdown="1">
-![Screenshot of early gameplay]({{site.url}}/image/the_witness/img1.jpg)
+![Screenshot of early gameplay](/image/the_witness/img1.jpg)
 <figcaption>
 The Witness의 퍼즐, 한붓 그리기
 </figcaption>
@@ -23,7 +23,7 @@ The Witness는 퍼즐 + 오픈게임으로 퍼즐로 가득 찬 섬을 돌아다
 게임에서 보여주는 퍼즐은 오직 한붓그리기 뿐이다. 동그라미에서 시작하여 끝은 둥근 팁으로 끝나야 한다. 이 게임을 해보면 단순한 한붓 그리기로 이렇게 어려운 퍼즐을 만들어 낼 수 있는지 놀라게 된다. 또한 한붓 그리기를 이용하여 모든 것을 해결한다. 엘레베이터 조작 패널역시 한 붓 그리기로 보여준다.  (이는 Braid에서 ‘시간 돌리기’라는 아이디어를 한계까지 사용하여 스토리를 진행시킨 것과 비슷하다고 생각하였다. )
 
 <figure markdown="1">
-![Image of Elevator: extreme usage of the mechanic]({{site.url}}/image/the_witness/img2.jpg)
+![Image of Elevator: extreme usage of the mechanic](/image/the_witness/img2.jpg)
 <figcaption>
 엘레베이터 조작 패널도 한붓 그리기이다.
 </figcaption>

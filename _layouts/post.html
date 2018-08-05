@@ -5,7 +5,7 @@ layout: default
 {% if page.cover-img %}
   <script type="text/javascript">{% include cover-img.js %}</script>
   <div class = "cover-img-container">
-    <img class = "cover-img" src="{{site.url}}{{page.cover-img}}" >
+    <img class = "cover-img" src="{{page.cover-img}}" >
   </div>
 {% endif %}
 <script type="text/javascript">{% include embed-resize.js %}</script>
@@ -23,7 +23,7 @@ layout: default
         <div id="disqus_thread"></div>
         <script>
         var disqus_config = function () {
-            this.page.url = "{{site.url}}{{ page.url }}";  // Replace PAGE_URL with your page's canonical URL variable
+            this.page.url = "{{ page.url }}";  // Replace PAGE_URL with your page's canonical URL variable
             this.page.identifier = "{{ page.id }}"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
         };
         (function() { // DON'T EDIT BELOW THIS LINE

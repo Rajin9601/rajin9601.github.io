@@ -16,7 +16,7 @@ Hyper Light Drifter는 예전에 reddit/gaming에서 봤던 게임이였다. 그
 # 그래픽
 
 <figure markdown="1">
-![Hyper Light Drifter's pixel graphic]({{site.url}}/image/hyper_light_drifter/img01.jpg)
+![Hyper Light Drifter's pixel graphic](/image/hyper_light_drifter/img01.jpg)
 <figcaption>
 너무 예뻐...
 </figcaption>
@@ -25,7 +25,7 @@ Hyper Light Drifter는 예전에 reddit/gaming에서 봤던 게임이였다. 그
 그래픽은 픽셀 아트이다. 심지어 가끔 나오는 컷신에서도 픽셀아트를 썼다. (쩐다...) 색감이 좋아서 하면서 풍경을 감상하기에도 좋다. 그러는 동시에 플레이어가 게임 도중에 꼭 봐야 되는 정보들 (적이 어느쪽으로 대시해 올 것인지, 어느 타일이 폭파될 것인지)은 보라색 하이라이트를 사용하여 그래픽이 플레이에 방해되는 일은 없었다.
 
 <figure markdown="1">
-![Hyper Light Drifter's purple highlight]({{site.url}}/image/hyper_light_drifter/img02.jpg)
+![Hyper Light Drifter's purple highlight](/image/hyper_light_drifter/img02.jpg)
 <figcaption>
 적이 많고 그래픽이 화려해도, 적의 공격은 보라색 하이라이트로 보인다.
 </figcaption>
@@ -38,7 +38,7 @@ Hyper Light Drifter는 예전에 reddit/gaming에서 봤던 게임이였다. 그
 맨 처음 볼때는 그냥 계속 대시하면서 때리면 되겠다는 생각을 했지만, Hyper Light Drifter는 절대 생각없이 하면 안되는 게임이다. 튜토리얼에서는 버튼을 막 누르면 되겠지만, 튜토리얼이 끝나자 마자 막히게 된다. 이 게임은 대시 스킬이 키 메커닉이여서, 다른 게임들과 비슷하게 만들면 대시와 공격만 하여 게임이 너무 쉽게 풀릴 것이다. 이를 대비해서 여러가지 장치를 해놓았다.
 
 <figure markdown="1">
-![Control animation]({{site.url}}/image/hyper_light_drifter/gif01.gif)
+![Control animation](/image/hyper_light_drifter/gif01.gif)
 <figcaption>
 적이 너무 많고 내 공격을 무시하고 반격하는 적도 있어서 총과 대시와 칼을 적절한 타이밍에 써야한다.
 </figcaption>
@@ -47,7 +47,7 @@ Hyper Light Drifter는 예전에 reddit/gaming에서 봤던 게임이였다. 그
 첫 번째 장치는 게임이 진행되면서 많이 늘어나지 않는 HP이다. 심지어 다크소울도 가면 갈수록 health가 증가하는데 이 게임은 그마저도 없다. 체력은 5칸으로 가장 약한 공격도 1칸을 깎기 때문에, 아무리 약한 적이여도 조심하게 된다. 강한 공격은 2칸을 깎기 때문에 3칸만 달아도 적 공격 한방에 죽을 가능성이 생긴다. 채력 회복 킷은 총 3개를 가지고 다닐 수 있지만, 상당히 빨리 소모되는 것을 느낄 수 있을 것이다.
 
 <figure markdown="1">
-![Character is dying]({{site.url}}/image/hyper_light_drifter/img03.png)
+![Character is dying](/image/hyper_light_drifter/img03.png)
 <figcaption>
 제발 빨간 포션 좀 주세요 으어
 </figcaption>
@@ -56,7 +56,7 @@ Hyper Light Drifter는 예전에 reddit/gaming에서 봤던 게임이였다. 그
 두 번째 장치는 무적 타임을 없앤것이다. 많은 게임들은 공격을 맞으면 무적 타임이 생긴다. (메이플 스토리, 록맨) 무적 타임은 사실 플레이어가 한번에 여러 공격을 한꺼번에 받지 않도록 하여 오래 살아남게 만드는 장치이다. 이 장치가 없어짐에 따라, 플레이어는 한꺼번에 여러 공격을 중첩되어 받으면서 죽을 수 있는 가능성이 높아진다. (대시하는 동안에도 맞을 수 있다.) 적들의 공격 패턴 역시 다양해서 총을 쏘기도, 가까이 와서 때리기도, 플레이어를 얼리기도, 주인공의 주변을 폭파시키기도, 먼 거리를 대시하면서 때리기도 하기 때문에 공격들의 중첩 가짓수은 무궁무진하다.
 
 <figure markdown="1">
-![Crystal spider. It freezes you.]({{site.url}}/image/hyper_light_drifter/img04.png)
+![Crystal spider. It freezes you.](/image/hyper_light_drifter/img04.png)
 <figcaption>
 캐릭터를 얼리는 거미. 얼려진 상태에서 다시 얼림 당하기도 가능해서 한번 얼림 당하면 여러번 당하기가 쉽다.
 </figcaption>
@@ -75,7 +75,7 @@ Hyper Light Drifter는 예전에 reddit/gaming에서 봤던 게임이였다. 그
 이 게임에서 놀랐던 부분 중 하나는 인터랙션 방식이였다. 가장 주된 인터랙션 방식은 버튼을 '길게' 누르는 것이다. 문을 여는 데도, 어떤 아이템을 살지 선택할 때도, 마을 사람들과 대화를 진행할 때도 버튼을 꾹 눌러야 된다. 이 방식에 놀란 점은 *길게* 누른다에 있다. 단순히 Y 버튼을 누르세요 같은 걸 해도 되는데도 굳이 길게 누르는 것으로 선택을 구현한 것은 단순히 선택을 하는 것이 아니라 어떤 기를 넣고 있다는 느낌을 주고, 잘못 클릭해서 선택되는 일을 방지한다. 또한 이를 보여주는 UI도 굉장히 직관적으로 만들어 놔서, 인터랙션이 깔끔하다는 느낌을 받았다.
 
 <figure markdown="1">
-![UI for the selection]({{site.url}}/image/hyper_light_drifter/img05.png)
+![UI for the selection](/image/hyper_light_drifter/img05.png)
 <figcaption>
 꾹 누르는 UI. 안 누르고 있으면 빈칸이지만 누르고 있으면 점점 빈칸이 차고, 꽉 차면 문으로 다른 장소로 이동한다.
 </figcaption>

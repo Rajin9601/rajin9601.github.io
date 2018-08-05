@@ -7,12 +7,11 @@
 
 # Site settings
 title: "Rajin :"
-subtitle: Quadrilateral Cowboy
+subtitle: Octopath Traveller
 email: rajin9601@gmail.com
 description: >
   만들고 싶은 것을 만드는 사람.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://rajin9601.github.io" # the base hostname & protocol for your site
 github_username: rajin9601
 twitter_username: rajin9601
 
@@ -20,4 +19,3 @@ twitter_username: rajin9601
 markdown: kramdown
 
 category_list: [ dev, game, music, life ]
-
