@@ -16,7 +16,7 @@ permalink: /resume/
     </div>
 </div>
 
-> Became software developer because I like making something.
+> Became software developer because I like creating stuff.
 
 ## Education
 
@@ -38,6 +38,7 @@ permalink: /resume/
 
 
 ## Experience
+* Client Programmer at VCNC. Developing Android and iOS Application for '타다' <sup>2018.7 - </sup>
 * Android Programmer at VCNC. Developing Android Application for Between <sup>2017.7 - </sup>
 * Internship at 42 Company. Developing Contents Crawler for Slide <sup>2016.12 - 2017.1</sup>
     * Used Ruby on Rails(Active Admin), AngularJS, PhantomJS.
