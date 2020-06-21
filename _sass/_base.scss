@@ -65,6 +65,11 @@ figure img {
     max-height: 450px;
 }
 
+figure img.full-width {
+    display: inline-block;
+    max-height: 10000px;
+}
+
 figure video {
     display: inline-block;
     max-height: 450px;
