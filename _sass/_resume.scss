@@ -6,11 +6,25 @@ article.resume {
 }
 
 body {
-    font-size: 15px;
+    font-size: 16px;
 }
 
-sub, sup {
+sub, sup, small {
+    font-weight: 300;
     color: gray;
+}
+
+small {
+    font-size: 70%;
+}
+
+h2 {
+    font-weight: 400;
+    border-bottom: 1px solid black;
+}
+
+h3 {
+    font-weight: 400;
 }
 
 #resume-header {
@@ -32,7 +46,7 @@ sub, sup {
         float: left;
         height: 100%;
         width: calc(100%-180px);
-        padding-top: 8px;
+        padding-top: 22px;
         box-sizing: border-box;
         #info-name {
             font-size: 28px;
@@ -49,7 +63,7 @@ sub, sup {
 
 @include media-query($on-palm) {
     #resume-header {
-        height: 350px;
+        height: 300px;
         width: 100%;
         #profile {
             height: 150px;
@@ -78,4 +92,10 @@ sub, sup {
             }
         }
     }
+}
+
+#update-date {
+    font-size: 14px;
+    color: gray;
+    text-align: end;
 }
