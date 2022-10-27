@@ -7,7 +7,7 @@ img-overlay: 0.1
 comments: true
 ---
 
-지인에게 발표했던 자료인데 공개하면 좋을것 같아서 블로그에 공유합니다.
+수상한 사람들과 수상한 모임에서 발표한 자료인데 공개하면 좋을것 같아서 블로그에 공유합니다.
 
 <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTFxgotQz3xuD2Vcb4KwaD9SRDMQMZQ3Q4-l5KeyAXE0jksPNn22PrgcwLZh5OAtbxdnLe9A4J5MqOC/embed?start=false&loop=false&delayms=3000" frameborder="0" width="100%" style="aspect-ratio: 1.71;" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
 
