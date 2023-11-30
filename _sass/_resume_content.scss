@@ -45,8 +45,8 @@ h3 {
         text-align: left;
         float: left;
         height: 100%;
-        width: calc(100%-180px);
-        padding-top: 22px;
+        width: calc(100% - 180px);
+        padding-top: 5px;
         box-sizing: border-box;
         #info-name {
             font-size: 28px;
@@ -63,7 +63,7 @@ h3 {
 
 @include media-query($on-palm) {
     #resume-header {
-        height: 300px;
+        height: 350px;
         width: 100%;
         #profile {
             height: 150px;
