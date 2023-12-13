@@ -23,27 +23,37 @@ permalink: /resume/
 
 # Experience
 
-## 타다 서버 개발자 <sup>2022.4 ~ 2023.8 (1년 4개월)</sup>
-
-클라이언트 개발에서 서버 개발로 직군을 전환했습니다. 도메인 지식 및 제품 이해도를 바탕으로 서버 개발 지식을 수월하게 습득했고, 소규모 팀이었기 때문에 다양한 업무를 경험할 수 있었습니다.
+## 타다 서버 개발자 <sup>2022.4 ~ 2023.8</sup>
 
 - 차량호출 서비스 (80명~, 개발팀 15~25명, 서버팀 6~9명)
 - 호출, 배차, 정산, 어드민 등 기존 비즈니스 로직 유지보수 및 문제 대응
 - 서버 개발/운영시 불편함을 해소하기 위한 리팩토링 및 기능 개발
 - AWS 인프라 / MySQL 데이터베이스 유지보수, 모니터링 및 장애 대응
-- 티머니 단말기 연동 개발 / 인프라 작업 <sup>2023.05 ~ 2023.07</sup>
 - 4명으로 이루어진 사일로에서 드라이버 유효운행시간을 늘리기 위한 기능 서버 담당 <sup>2022.08 ~ 2023.02</sup>
 - Tech
     - Kotlin, Spring Boot, gRPC, Protocol Buffers, MySQL, Hibernate, Redis, SQS
     - Kubernetes, Helm, Terraform
     - [관련 VCNC 개발블로그 글](https://blog-tech.tadatada.com/2019-01-28-tada-system-architecture)
 
-### 티머니 단말기 연동 & 전용선 소통을 위한 추가적인 인프라 작업 <sup>2023.5 ~ 2023.7</sup>
+### 티머니 단말기 연동 & 전용선 소통을 위한 추가적인 인프라 작업
 
 - 티머니 단말기를 통한 결제를 할수 있도록 타다 서버와 티머니 서버간의 연동
 - 정산시 타다 정보와 티머니측 정보가 일치하는지 확인하는 시스템 설계 
 - 티머니와 전용선을 통한 HTTPS 소통을 위한 인프라 작업 진행
 - 전용선 연결의 명확한 문제 해결을 위해 연결 로그 분석
+
+### 무이자 대출 시스템 개발 및 운영
+
+- VCNC 측에서 드라이버에게 무이자 대출을 해주고 원금은 12개월에 걸쳐서 운행 수익의 n% 를 상환수수료로 걷어 대출상환을 하도록 하는 시스템 설계 및 구현
+- 1개월에 100만원까지만 상환수수료를 걷고 그 이상 운행하였을시엔 상환수수료를 상환하지 않는 구조 설계 및 구현
+- 티머니를 통한 정산 시스템과 상환수수료를 연동
+- 운영하며 나온 CS 대응을 위한 기능 구현
+
+### 드라이버 등급제 개발 및 운영
+
+- 드라이버의 운행유도를 위해 운행 횟수에 따라 등급을 부여하고 등급별로 추가 기능들을 제공
+- 어뷰징을 방지하기 위한 정책 설계 및 등급유지조건 설계
+- CS 대응을 위한 어드민 추가 개발
 
 ### CI 시간 최적화
 
@@ -51,27 +61,12 @@ permalink: /resume/
 - async profiler를 통해 GC 실행시간이 병목임을 발견
 - Memory dump 후 분석결과, [mockito-inline](https://github.com/mockito/mockito/issues/1614) 과 [spring 의 Cglib2AopProxy](https://github.com/spring-projects/spring-framework/issues/12663)에 메모리 leak 이 존재하는 것을 발견 & Work-around 적용
 
-### 무이자 대출 시스템 개발 및 운영 <sup>2022.5 ~ </sup>
-
-- VCNC 측에서 드라이버에게 무이자 대출을 해주고 원금은 12개월에 걸쳐서 운행 수익의 n% 를 상환수수료로 걷어 대출상환을 하도록 하는 시스템 설계 및 구현
-- 1개월에 100만원까지만 상환수수료를 걷고 그 이상 운행하였을시엔 상환수수료를 상환하지 않는 구조 설계 및 구현
-- 티머니를 통한 정산 시스템과 상환수수료를 연동
-- 운영하며 나온 CS 대응을 위한 기능 구현
-
-### 본인인증 & 소셜 로그인 연동 <sup>2023.4 ~ 2023.6</sup>
-
-- 본인인증 필수화 기능 설계
-- 소셜 로그인 (카카오/애플) 연동
-
-## 타다 클라이언트 개발자 <sup>2018.7 ~ 2022.4 (3년 6개월)</sup>
-
-안드로이드와 iOS를 전부 담당하는 클라이언트 팀이었습니다. 처음 앱을 만들 때부터 아키텍처 설계에 깊이 관여했으며, 출시 당시에는 기능 개발 외적인 부분(인터널 라이브러리, RIBs 개조, 툴링)을 주로 담당했습니다. ([워크샵에서 발표한 PPT](https://docs.google.com/presentation/d/e/2PACX-1vRBYACbRdO0rK71Ee-DHxL_TcjLLIpJnpD39S3OUPIupKQKZ_fV4ofq81oMY56yVLalDeTwflH1vkQ2/pub?start=false&loop=false&delayms=10000&slide=id.p) 참고)
+## 타다 클라이언트 개발자 <sup>2018.7 ~ 2022.4</sup>
 
 - 클라이언트 팀 (5 ~ 6명 규모. 2020.10 부터 Android Tech Lead)
-- 타다 라이더/드라이버 앱 출시 및 유지보수
-- 핸들모아 (대리운전 기사용 앱) 출시 및 유지보수
-- RIBs 을 VCNC 상황에 맞게 수정 및 유지보수
-- 클라이언트 내부 라이브러리 & 툴링 개발
+- 타다 시작시, iOS / 안드로이드 앱 아키텍쳐 설계
+- 타다 라이더 / 드라이버 앱,  핸들모아 (대리운전 기사용 앱) 출시 및 유지보수
+- 클라이언트 내부 라이브러리 & 툴링 개발 ([PPT 발표 참고](https://docs.google.com/presentation/d/e/2PACX-1vRBYACbRdO0rK71Ee-DHxL_TcjLLIpJnpD39S3OUPIupKQKZ_fV4ofq81oMY56yVLalDeTwflH1vkQ2/pub?start=false&loop=false&delayms=10000&slide=id.p))
 - 인앱 브라우저를 최대한 네이티브처럼 보이기 위해 전체 구조 설계 & 앱쪽 구현
 - Tech
     - Kotlin/Swift, [RIBs](https://github.com/uber/RIBs), RxJava/Swift, gRPC, Protocol Buffers, Moshi, [Motif](https://github.com/uber/motif)
@@ -100,7 +95,7 @@ permalink: /resume/
 - 웹과 앱간의 소통 api 설계 및 안드로이드 파트 구현
 - [stackflow](https://github.com/daangn/stackflow) 와 화면 진입시 로딩/에러/애니메이션 처리에 집중
 
-## 비트윈 안드로이드 개발자 <sup>2017.7 ~ 2018.7 (1년)</sup>
+## 비트윈 안드로이드 개발자 <sup>2017.7 ~ 2018.7</sup>
 
 타다에서 클라이언트 개발자로 일하기 전에, 비트윈에서 1년 간 안드로이드 앱 개발을 했습니다.
 
@@ -115,11 +110,11 @@ permalink: /resume/
 - 42 Company (2016.12 - 2017.1) - 컨텐츠 크롤러 개발 & 내부 어드민 효율화
 - Ultracaption (2015.7 - 2015.8) - PLAIN iOS 앱 개발
 
-# Education
+# Skills
 
-- 서울대학교 컴퓨터공학 학사 <sup>2014 ~ 2021</sup>
-    - 산업기능요원 <sup>2017 ~ 2020</sup>
-- 경기과학고등학교 <sup>2011 ~ 2014</sup>
+- Kotlin(Java), Swift, Typescript
+- Spring Boot, gRPC, Protobuf, Hibernate, Redis, SQS, RxJava/Reactor
+- Kubernetes, Helm, Terraform
 
 # Presentations
 
@@ -128,17 +123,21 @@ permalink: /resume/
 - [타다 안드로이드 기반 작업](https://docs.google.com/presentation/d/e/2PACX-1vRBYACbRdO0rK71Ee-DHxL_TcjLLIpJnpD39S3OUPIupKQKZ_fV4ofq81oMY56yVLalDeTwflH1vkQ2/pub?start=false&loop=false&delayms=10000&slide=id.p) <sup>2018.12</sup>
     - 타다 클라이언트 개발시 했던 기반작업들 요약
 
-# ETC
+# Education
 
-* [WaffleStudio](https://www.facebook.com/wafflestudio/) 동아리 활동 <sup>2015 ~ 2016</sup>
-* 한국정보올림피아드 전국 본선 금상<sup>2013</sup>
+- 서울대학교 컴퓨터공학 학사 <sup>2014 ~ 2021</sup>
+    - 산업기능요원 <sup>2017 ~ 2020</sup>
+    - [WaffleStudio](https://www.facebook.com/wafflestudio/) 동아리 활동 <sup>2015 ~ 2016</sup>
+- 경기과학고등학교 <sup>2011 ~ 2014</sup>
+    - 한국정보올림피아드 전국 본선 금상 <sup>2013</sup>
 
 # Side-Projects
 
-* [SNUTT2](https://snutt.kr/) <sup>2015 ~ 2021</sup>
-    * 5명 중 iOS 담당.
-    * [Link to AppStore](https://itunes.apple.com/kr/app/snutt-서울대학교-시간표-앱/id1215668309?mt=8), [Link to Github](https://github.com/wafflestudio/SNUTT-iOS)
-* [21 Days](http://store.steampowered.com/app/607660/21_Days/)
-    * 총 6명. 2명 프로그래머 중 리드
+- [SNUTT2](https://snutt.kr/) <sup>2015 ~ 2021</sup>
+    - 5명 중 iOS 담당.
+    - [Link to AppStore](https://itunes.apple.com/kr/app/snutt-서울대학교-시간표-앱/id1215668309?mt=8), [Link to Github](https://github.com/wafflestudio/SNUTT-iOS)
+- [21 Days](http://store.steampowered.com/app/607660/21_Days/)
+    - 총 6명. 2명 프로그래머 중 리드
+    - BIC 2016 Excellence in Narrative Finalist
 
-<div id="update-date">updated at 2023.12.06</div>
+<div id="update-date">updated at 2023.12.13</div>
