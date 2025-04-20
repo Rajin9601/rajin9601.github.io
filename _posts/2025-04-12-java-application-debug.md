@@ -224,33 +224,41 @@ func main() {
 }
 ```
 
-현재 데드락이 생기는 시나리오는 다음과 같습니다.
+현재 데드락이 발생하는 시나리오는 다음과 같습니다.
 
-1. dd-java-agent.jar 가 돌면서 dd-trace-processor thread 를 만듬
-2. main 함수가 실행되기 시작
-3. dd-trace-processor 의 내용물이 멀티쓰레드 환경에서 main 함수의 내용물과 동시에 진행되고 있으며, dd-trace-processor 내용물 실행에 필요한 class loading 을 열심히 하고 있다.
-4. main 함수의 `ReactorDebugAgent.init()` 이 실행되면서 이 순간 이후에 일어나는 모든 class loading 에서는 ReactorDebugAgent 내의 transformer 가 실행이 된다.
-5. main 함수에서 RajinApplication 를 실행하기 위해 RajinApplication 의 class loading 이 시작됨
-    1. **RajinApplication 의 classLoader 인 LaunchedClassLoader 에 lock 을 잡음**
-6. dd-trace-processor 에서 class Loading 이 실행되는데, 4번에 의해서 이젠 ReactorDebugAgent 의 transformer 가 실행됨.
-    1. 참고 : 3번에서는 ReactorDebugAgent.init() 이 실행되기 전이니 transformer 가 실행이 안되고 있었다.
-    2. dd-trace-processor 에서 ReactorDebugAgent 의 transformer 의 내용물을 실행한다.
-	3. ReactorDebugAgent 의 transformer 안에 있는 `ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS);` 코드를 실행하기 위해 ClassWriter 의 class loading 을 시작한다.
-    3. ClassWriter 의 classLoader 는 LaunchedClassLoader 이기 때문에 **LaunchedClassLoader 에 lock 을 잡으려고 시도 하는데 이미 main 에서 잡고 있기 때문에 blocked**
-7. main 에서 5번에서 하고 있던 ClassLoading 에서  ReactorDebugAgent 의 transformer 가 실행되면서 ClassWriter 의 class loading 시도
-    1. 이미 dd-trace-processor 에서 로딩을 하고 있기에, 해당 쓰레드에서 로딩을 끝내면 그 로딩된 결과물을 사용하기 위해서 **dd-trace-processor 에 진행하고 있는 ClassWriter 의 class loading 을 기다림.**
+1. `dd-java-agent.jar`가 실행되면서 `dd-trace-processor` 스레드를 생성합니다.
+2. `main` 함수가 실행되기 시작합니다.
+3. `dd-trace-processor`의 로직이 멀티스레드 환경에서 `main` 함수와 동시에 수행되며, 해당 로직에 필요한 클래스들을 로딩하고 있습니다.
+4. `main` 함수에서 `ReactorDebugAgent.init()`이 호출되면서, 이 시점 이후에 발생하는 모든 클래스 로딩 과정에서는 `ReactorDebugAgent` 내부의 변환기(transformer)가 실행됩니다.
+5. `main` 함수에서 `RajinApplication`을 실행하기 위해 해당 클래스의 로딩을 시작합니다.  
+   - **이때 `RajinApplication`의 클래스 로더인 `LaunchedClassLoader`에 대한 락을 획득합니다.**
+6. `dd-trace-processor`에서도 클래스 로딩이 발생하는데, 4번에서 설명한 바와 같이 이제 `ReactorDebugAgent`의 변환기가 실행됩니다.  
+   1. 참고: 3번 시점에서는 아직 `ReactorDebugAgent.init()`이 실행되지 않았기 때문에 변환기가 적용되지 않았습니다.  
+   2. `dd-trace-processor`에서 `ReactorDebugAgent`의 변환기 내부 로직이 실행됩니다.  
+   3. 해당 변환기 안의 `ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS);` 코드를 실행하기 위해 `ClassWriter` 클래스의 로딩을 시도합니다.  
+   4. 이 `ClassWriter`의 클래스 로더는 `LaunchedClassLoader`이기 때문에, **락을 획득하려 하지만 이미 `main`이 보유하고 있어 대기 상태에 빠집니다.**
+7. 한편 `main`에서도 5번에서 수행하던 클래스 로딩 중에 `ReactorDebugAgent`의 변환기가 실행되고, 이 또한 `ClassWriter`의 로딩을 시도하게 됩니다.  
+   - 이미 `dd-trace-processor`가 해당 클래스를 로딩 중이므로, 해당 작업이 완료되기를 **기다리게 됩니다.**
 
-6번과 7번에 의해서 데드락이 형성이 됩니다.
-- dd-trace-processor : ClassWriter 를 로딩을 위해서, LaunchedClassLoader 의 lock 을 잡으려고 함
-- main : LaunchedClassLoader 의 lock 을 잡은 상태로 ClassWriter 로딩을 기다림
+결과적으로 6번과 7번의 교착 상황으로 인해 데드락이 형성됩니다.
 
-이 시나리오를 보면 데드락이 생길수 있고, 왜 간헐적으로 문제가 생겼는지도 알수 있습니다. main thread 에서 "RajinApplication 의 class loading 시작하면서 LaunchedClassLoader 의 락을 잡는 그 타이밍"과 "ReactorDebugAgent 의 transformer 가 시작하는 그 타이밍" 사이에 "dd-trace-processor thread 에서 ReactorDebugAgent의 transformer 가 실행"이 되면 생기는 문제이기에, 멀티 쓰레딩 환경에서 타이밍이 맞아 떨어져야 발생하는 문제이기 때문입니다.
+- `dd-trace-processor`: `ClassWriter`를 로딩하기 위해 `LaunchedClassLoader`의 락을 획득하려고 시도함  
+- `main`: 이미 `LaunchedClassLoader`의 락을 보유한 채 `ClassWriter`의 로딩이 완료되기를 기다림
+
+이 시나리오를 통해 데드락이 발생할 수 있음을 알 수 있으며, 해당 문제가 간헐적으로 발생하는 이유도 설명됩니다.  
+즉, `main` 스레드가 `RajinApplication` 클래스의 로딩을 시작하여 `LaunchedClassLoader`의 락을 획득하는 시점과 `ReactorDebugAgent`의 변환기가 활성화되는 시점 사이에  
+`dd-trace-processor` 스레드에서 변환기가 실행된다면 이 문제가 발생하게 됩니다.  
+멀티스레드 환경에서 이와 같은 타이밍이 맞아떨어져야만 데드락이 생기기 때문에, 현상이 간헐적으로 나타나는 것입니다.
+
 
 # 문제 해결
 
-근데 이 문제들은 애초에 멀티쓰레드 환경에서 class loading 을 하면 생길수 밖에 없는 문제입니다. LaunchedClassLoader 가 사실 ParallelCapable 이라면 lock 을 잡지 않을것이기 때문에 문제가 발생하지 않을 것입니다. LaunchedClassLoader 는 Spring Boot 의 기본 ClassLoader 이기에 Parallel class loading 을 지원하지 않는다는 것이 매우 이상했습니다.
+그런데 이 문제는 애초에 멀티스레드 환경에서 클래스 로딩을 수행할 경우 발생할 수밖에 없는 구조적 문제입니다.  
+`LaunchedClassLoader`가 실제로 `ParallelCapable`하다면 클래스 로더의 락을 획득하지 않기 때문에 이러한 문제가 발생하지 않았을 것입니다.
 
-실제로 코드를 보면 [LaunchedClassLoader 는 스스로를 ParallelCapable 로 취급하려고 합니다.](https://github.com/spring-projects/spring-boot/blob/e49a2daf38bccbb956043f1cd17bdf9296840871/spring-boot-project/spring-boot-tools/spring-boot-loader-classic/src/main/java/org/springframework/boot/loader/LaunchedURLClassLoader.java#L42-L49)
+`LaunchedClassLoader`는 Spring Boot의 기본 클래스 로더이기 때문에, 병렬 클래스 로딩을 지원하지 않는다는 점이 매우 이상하게 느껴졌습니다.
+
+실제로 코드를 보면 [`LaunchedClassLoader`는 스스로를 `ParallelCapable`로 등록하려고 시도합니다.](https://github.com/spring-projects/spring-boot/blob/e49a2daf38bccbb956043f1cd17bdf9296840871/spring-boot-project/spring-boot-tools/spring-boot-loader-classic/src/main/java/org/springframework/boot/loader/LaunchedURLClassLoader.java#L42-L49)
 
 ```java
 public class LaunchedURLClassLoader extends URLClassLoader {
@@ -260,7 +268,8 @@ public class LaunchedURLClassLoader extends URLClassLoader {
   }
 ```
 
-하지만 그럼에도 불구하고 ParallelCapable 이 아닌 이유는 [registerAsParallelCapable 이 동작하려면 그 class loader 의 super class 도 ParallelCapable 해야 합니다.](https://github.com/openjdk/jdk/blob/f174bbd3baf351ae9248b70454b3bc5a89acd7c6/src/java.base/share/classes/java/lang/ClassLoader.java#L270-L284)
+하지만 그럼에도 불구하고 `ParallelCapable`로 등록되지 않는 이유는, [`registerAsParallelCapable` 메서드가 동작하기 위해서는 해당 클래스 로더의 상위 클래스 또한 `ParallelCapable`이어야 하기 때문](https://github.com/openjdk/jdk/blob/f174bbd3baf351ae9248b70454b3bc5a89acd7c6/src/java.base/share/classes/java/lang/ClassLoader.java#L270-L284)입니다.
+
 
 ```java
 // from ClassLoader.java
@@ -281,19 +290,26 @@ static boolean register(Class<? extends ClassLoader> c) {
 }
 ```
 
-Spring Boot 의 코드와 코드 history 를 살펴보니 parallel capable 로 등록하고 싶었던것 같은데, 잘못하여 등록이 안된 것 같아, [Spring Boot 에 PR](https://github.com/spring-projects/spring-boot/pull/41665) 을 날려 수정하였습니다.
+Spring Boot의 코드와 코드 변경 이력을 살펴보면, 병렬 클래스 로딩을 의도하고 있었던 것으로 보입니다. 그러나 상위 클래스의 조건을 놓쳐 등록이 되지 않았던 것으로 판단됩니다. 이에 따라 [Spring Boot에 Pull Request를 보내어](https://github.com/spring-projects/spring-boot/pull/41665) 해당 문제를 수정하였습니다.
 
-그리고 PR 머지가 된 후의 Spring Boot 릴리즈를 사용하도록 하여 문제를 해결하였습니다.
+이후 해당 PR이 반영된 Spring Boot 버전을 사용하여 문제를 해결할 수 있었습니다.
 
-## 번외 : 왜 갑자기 문제가 생긴것인가?
+## 번외: 왜 갑자기 문제가 생겼는가?
 
-그러면 이 문제가 저희 서비스에 왜 갑자기 생긴것인지를 찾아보니 [Spring Boot 에서 사용하는 ClassLoader 가 Spring Boot 3.2 에서 바뀌었기 때문이였습니다.](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.2-Release-Notes?source=post_page-----a3656f8e69b4--------------------------------#nested-jar-support)
+이 문제가 왜 갑자기 나타났는지를 추적해본 결과, [Spring Boot 3.2부터 기본적으로 사용하는 클래스 로더가 변경되었기 때문](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.2-Release-Notes?source=post_page-----a3656f8e69b4--------------------------------#nested-jar-support)이었습니다.
 
-실제로 문제가 생겼던 서버들은 모두 Spring Boot 버전을 3.2 로 업그레이드 한 후로 부터 문제가 발생하기 시작했었습니다.
+실제로 문제가 발생했던 서비스들은 모두 Spring Boot를 3.2 버전으로 업그레이드한 이후부터 해당 현상이 나타나기 시작하였습니다.
 
 # 마무리
 
-문제를 해결하기 위해서 많은 헛걸음질이 있었던 것도 사실입니다. 만약 jstack 에서 보였던 상태가 java 단의 lock 이 아니라 jvm 내부같은 native code 에서 lock 을 잡힌다면 생길수 있는 상태라는걸 알았더라면, JVM 에서 Class Loading 과 Transformer 가 어떤 식으로 동작하는지 알았더라면, ClassLoader 가 ParallelCapable 하지 않다는게 무슨 뜻인지 알고 있었더라면, 훨씬 빠르게 디버깅을 마무리 지을수 있었을것 같습니다.
+문제를 해결하기까지 많은 시행착오가 있었던 것도 사실입니다. 만약 `jstack`에서 확인된 스레드 상태가 Java 단의 락이 아니라 JVM 내부의 네이티브 코드 수준에서 발생할 수 있다는 사실을 알았더라면,  
+또 JVM에서 클래스 로딩과 변환기(Transformer)가 어떻게 동작하는지를 이해하고 있었더라면,  
+그리고 클래스 로더가 `ParallelCapable`하지 않다는 것이 어떤 의미인지 미리 알고 있었더라면,  
+더 빠르게 디버깅을 마칠 수 있었을지도 모릅니다.
 
-하지만 언제나 모든 내용을 알고 있는 상태일수는 없기에 그 지식을 얻기 위한 길을 알고 있는것도 중요한 것 같습니다. ~~(사실 요즘같은 시대에는 ChatGPT 한테 jstack 내용물만 던져줘도 상당히 많은 것을 알수 있긴 합니다)~~
-Java Program 에 문제가 생겼을 때, jstack, java remote debugging, JVM Log 키는 법, gdb 같은 툴들을 사용할수 있구나 라는 정보만 있더라도 빠르게 문제파악을 할수 있을것 같습니다. 긴 글 읽어주셔서 감사합니다.
+하지만 모든 것을 항상 알고 있을 수는 없습니다. 대신, 문제를 해결하는 길을 알고 있는 것이 더 중요하다고 생각합니다.  
+~~(사실 요즘 같은 시대에는 `jstack` 출력만 ChatGPT에게 보여줘도 꽤 많은 것을 알 수 있습니다)~~
+
+Java 애플리케이션에 문제가 발생했을 때, `jstack`, 원격 디버깅, JVM 로그 설정 방법, `gdb` 같은 도구를 사용할 수 있다는 사실만 알고 있어도 문제를 훨씬 빠르게 파악할 수 있습니다.
+
+긴 글 읽어주셔서 감사합니다.
