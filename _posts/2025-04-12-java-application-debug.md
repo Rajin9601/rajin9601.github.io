@@ -91,7 +91,7 @@ ReactorDebugAgent 내의 Transformer 코드에서 여러 스레드가 Block되�
 현재 겪고 있는 문제와는 조금 다르긴 하지만 중요한 건, class initialization 도중에 데드락이 걸리면 waiting 상태이면서 Thread.State 는 Runnable 이라는 정보를 알게 되었습니다.
 class initialization 관련 로그를 남겨야 겠다고 생각했고 [jvm arguments 로 남길수 있다는걸](https://bugs.openjdk.org/browse/JDK-8316229) 알게되어 `-Xlog:class+init=debug` 으로 로그를 보았습니다.
 
-# JVM log
+# JVM Log
 
 ```log
 [debug][class,init] Thread "dd-trace-processor" linking reactor.tools.shaded.net.bytebuddy.jar.asm.ClassWriter
@@ -106,12 +106,12 @@ class initialization 관련 로그를 남겨야 겠다고 생각했고 [jvm argu
 ```
 
 로그를 해석하면 다음과 같습니다.
-- dd-trace-processor 는 ClassWriter 의 class verification 을 시작했는데, `end class verification` 로그가 안찍히는걸 봐선 ClassWriter 의 class verification 이 무한로딩중이다.
-- main, dd-task-scheduler 등등의 thread 들은 dd-trace-processor 에서 하고 있는 ClassWriter 의 linking 을 기다리고 있다.
+- dd-trace-processor는 ClassWriter의 클래스 검증(class verification)을 시작했는데, end class verification 로그가 출력되지 않는 것으로 보아 ClassWriter의 클래스 검증이 무한 로딩 중인 것으로 추정됩니다.
+- main, dd-task-scheduler 등 여러 스레드는 dd-trace-processor가 수행 중인 ClassWriter의 링크(linking)를 기다리고 있습니다.
 
-결론적으론 dd-trace-processor 의 작업을 main 이 기다리고 있는데 dd-trace-processor 의 작업은 끝나지 않고 있으면서 main 보다 가만히 있는 상황입니다.
-class verification 과정이나 linking 을 기다리는 중인건 JVM 내부에서 실행되고 있기 때문에, 그 내부에서 무슨일이 일어나길래 무한로딩 중인지는 jvm 위에서 돌아가던 jstack 같은 도구로는 보이지 않았던 것입니다.
-따라서 더 깊게, 현재 무슨일이 일어나고 있는지를 보기 위해서는 jvm 내부에서 무슨 일이 일어나고 있는지를 봐야합니다.
+결론적으로는 dd-trace-processor의 작업을 main이 기다리고 있으나, dd-trace-processor의 작업은 끝나지 않고 있으며 main보다 먼저 멈춰 있는 상태입니다.
+클래스 검증이나 링크 과정을 기다리는 중인 작업은 JVM 내부에서 실행되고 있기 때문에, 그 내부에서 어떤 일이 발생하고 있기에 무한 로딩 중인지는 JVM 위에서 동작하는 jstack과 같은 도구로는 확인할 수 없습니다.
+따라서 더 깊이, 현재 무슨 일이 벌어지고 있는지를 보기 위해서는 JVM 내부를 직접 살펴보아야 합니다.
 
 # JVM 내부 보기 (gdb)
 
