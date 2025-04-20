@@ -68,12 +68,14 @@ ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS);
 
 # Java Remote Debugging
 
-먼저 로컬 환경에서 문제를 재현하고자 하였으나, Datadog가 비활성화된 설정이어서 재현이 어려웠습니다. 이에 따라 Pod에 Remote Debug 설정을 추가하고, IntelliJ를 통해 Stacktrace 상에서 Local Variable과 함수 인자 등을 확인할 수 있었습니다.
+먼저 로컬 환경에서 문제를 재현해보고자 IntelliJ와 같은 IDE를 활용하여 여러 정보를 확인하려 하였으나, 로컬에서는 재현이 어려웠습니다.  
+이는 로컬 환경 설정에서 Datadog가 실행되지 않도록 구성되어 있었기 때문으로 보이며, 해당 프로그램을 로컬에서 제대로 실행시키는 것 자체가 쉽지 않았습니다.
 
-확인된 상태는 다음과 같았습니다.
+이에 따라 Pod에 설정을 추가하여 원격 디버깅이 가능하도록 구성하였고, IntelliJ를 통해 현재 스택 트레이스 상에서 로컬 변수와 함수 인자에 어떤 값이 들어있는지를 확인할 수 있었습니다.  
+그 결과, 각 스레드의 상태는 다음과 같았습니다.
 
-- main 스레드는 RajinApplication 클래스를 로딩 중이며, 이 과정에서 ReactorDebugAgent에 등록된 ClassFileTransformer 실행 중 Block 상태임
-- `dd-`로 시작하는 Datadog 관련 스레드들도 클래스 로딩 중 ReactorDebugAgent의 Transformer 실행 중 Block 상태임
+- `main` 스레드는 `RajinApplication` 클래스를 로딩 중이며, 그 과정에서 `ReactorDebugAgent`에 등록된 `ClassFileTransformer`가 실행되다가 블로킹되어 있습니다.
+- `dd-`로 시작하는 Datadog 관련 스레드들 역시 프로그램을 실행하는 도중, 특정 클래스를 로딩하는 과정에서 `ReactorDebugAgent`의 `ClassFileTransformer`가 실행되며 블로킹된 상태입니다.
 
 # Stacktrace 기반 조사
 
