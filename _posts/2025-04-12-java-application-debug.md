@@ -115,7 +115,7 @@ class initialization 관련 로그를 남겨야 겠다고 생각했고 [jvm argu
 
 # JVM 내부 보기 (gdb)
 
-gdb 를 사용하면 JVM 내부까지 볼 수 있습니다. 단순한 stack trace 이상으로 memory 의 내용물까지 보고 싶다면, symbol table 이 보존되도록 JDK 를 빌드해서 돌리지 않는 이상 보기 힘들것 같다고 판단하여 stacktrace 만 먼저 뽑아 보았습니다.
+`gdb`를 사용하면 JVM 내부까지 확인할 수 있습니다. 단순한 스택 트레이스(stack trace)를 넘어 메모리의 내용까지 보고 싶다면, 심볼 테이블(symbol table)이 보존되도록 JDK를 직접 빌드하여 실행하지 않는 이상 확인이 어렵다고 판단하여, 우선 스택 트레이스만 추출하였습니다.
 
 dd-trace-processor thread 의 stacktrace
 ```log
@@ -175,7 +175,10 @@ main
 #18 0x0000000000000000 in ?? ()
 ```
 
-보면 락을 잡기 시작하는 곳은 SystemDictionary::resolve_instance_class_or_null 와 InstanceKlass::check_link_state_and_wait 입니다. 그래서 SystemDictionary 와 InstanceKlass 의 코드를 읽으면서 의심되는 곳들을 찾아보았습니다. ([주요코드1](https://github.com/openjdk/jdk/blob/65646b5f81279a7fcef3ea04ef9894cf66f77a5a/src/hotspot/share/classfile/systemDictionary.cpp#L248-L255), [주요코드2](https://github.com/openjdk/jdk/blob/65646b5f81279a7fcef3ea04ef9894cf66f77a5a/src/hotspot/share/classfile/systemDictionary.cpp#L600-L609))
+확인해보니 락을 잡기 시작하는 지점은 `SystemDictionary::resolve_instance_class_or_null`과 `InstanceKlass::check_link_state_and_wait`였습니다.  
+이에 따라 `SystemDictionary`와 `InstanceKlass`의 코드를 살펴보며 의심되는 지점을 조사하였습니다.  
+([주요 코드1](https://github.com/openjdk/jdk/blob/65646b5f81279a7fcef3ea04ef9894cf66f77a5a/src/hotspot/share/classfile/systemDictionary.cpp#L248-L255), [주요 코드2](https://github.com/openjdk/jdk/blob/65646b5f81279a7fcef3ea04ef9894cf66f77a5a/src/hotspot/share/classfile/systemDictionary.cpp#L600-L609))
+
 
 ```java
 // from systemDictionary.cpp
@@ -203,9 +206,12 @@ Handle SystemDictionary::get_loader_lock_or_null(Handle class_loader) {
   Handle lockObject = get_loader_lock_or_null(class_loader);
 ```
 
-해당 코드와 stacktrace 를 통해서 "JVM 은 class verification 과정이나 class loading 을 시작할때, ClassLoader의 lock 을 잡는다"는 사실과 그것 때문에 main 과 dd-trace-processor 와의 데드락이 발생중인것을 추측할수 있었습니다.
-만약 ClassLoader 가 ParallelCapable 이라면 ClassLoader 의 lock 을 잡지 않는데, jstack 으로 본 LaunchedClassLoader 는 ParallelCapable 이 아니라는것은 Intellij 의 remote debugging 을 통해 알아낼수 있었습니다.
-이러한 정보들 다 통합하여 결론적으로 문제가 되는 시나리오를 완성시킵니다.
+해당 코드와 스택 트레이스를 통해 "JVM은 클래스 검증과정이나 클래스 로딩을 시작할 때, `ClassLoader`의 락을 잡는다"는 사실을 확인할 수 있었으며, 이로 인해 `main`과 `dd-trace-processor` 간에 데드락이 발생하고 있음을 추측할 수 있었습니다.
+
+만약 `ClassLoader`가 `ParallelCapable`하다면 `ClassLoader`의 락을 잡지 않지만, `jstack`으로 확인한 `LaunchedClassLoader`는 `ParallelCapable`하지 않다는 사실을 IntelliJ의 Remote Debugging을 통해 확인할 수 있었습니다.
+
+이러한 정보들을 모두 종합하여, 결론적으로 문제가 발생하는 시나리오를 완성할 수 있었습니다.
+
 
 # 문제 시나리오
 
