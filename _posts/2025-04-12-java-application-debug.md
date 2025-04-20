@@ -10,18 +10,18 @@ draft: true
 
 # 상황 설명
 
-어느 날 부턴가, 특정 서비스 배포중에 가끔씩 pod ready 상태가 안되는 경우가 보였습니다. 현상은 다음과 같았습니다.
+어느 날부터 특정 서비스를 배포할 때 간헐적으로 Pod가 Ready 상태가 되지 않는 현상이 발생하기 시작했습니다. 구체적인 현상은 다음과 같았습니다.
 
-- 매우 가끔씩 (10% 확률?)로 pod 이 뜰때, ready 상태가 안된다.
-- pod 을 죽여서 재시작하면 또 잘될때가 있다.
-- 로그를 보면 JVM 시작 로그 만 조금 뜨고 Application 시작 로그는 안뜬다.
-- 이런 현상이 딱 2개의 서비스에서만 재현된다.
+- 간헐적(약 10% 확률)으로 Pod가 실행될 때 Ready 상태가 되지 않음
+- Pod를 재시작하면 정상적으로 동작할 때도 있음
+- 로그를 보면 JVM 시작 로그는 출력되나 Application 시작 로그는 보이지 않음
+- 해당 현상은 두 개의 서비스에서만 재현됨
 
-Application 시작 로그가 안 뜨지만, pod 이 crash 하는게 아니라 not-ready 상태로 계속 있는걸 보면 어디선가 deadlock 이 있는것으로 의심되기 때문에 먼저 stacktrace 를 뽑아보았습니다.
+Application 시작 로그가 출력되지 않지만, Pod가 Crash 나는 것이 아니라 Ready 상태가 되지 않은 채 유지되고 있는 것으로 보아, 데드락이 의심되어 먼저 Stacktrace를 확인하였습니다.
 
-# java stacktrace 확인
+# Java Stacktrace 확인
 
-문제의 pod 에 접속하여 jstack 명령어를 통해 현재 실행되고 있는 java 프로그램의 stacktrace 를 확인해봤습니다. (해당 프로그램을 RajinApplication 으로 지칭하겠습니다.)
+문제가 발생한 Pod에 접속하여 `jstack` 명령어를 통해 현재 실행 중인 Java 프로그램의 Stacktrace를 확인하였습니다. (해당 프로그램은 RajinApplication이라고 하겠습니다.)
 
 ```shell
 jstack -l -e <pid>
@@ -56,33 +56,37 @@ jstack -l -e <pid>
 ...
 ```
 
-보시면 main thread 가 이상한 곳에서 blocking 되어 있는것을 확인할수 있었는데요, ReactorDebugAgent 의 코드를 확인했지만 lock 을 잡거나 그런 코드가 전혀 보이지 않았습니다.
-```
-# ReactorDebugAgent 의 97 번 줄
+보시다시피 main 스레드가 ReactorDebugAgent에서 이상한 지점에서 Block되고 있었습니다. 해당 코드에서 명시적으로 락을 잡는 부분은 보이지 않았습니다.
+
+```java
+// ReactorDebugAgent의 97번 줄
 ClassReader cr = new ClassReader(bytes);
 ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS);
 ```
 
-보통 데드락이 잡히려면 명시적으로 lock 을 잡거나 synchronized block 이던 둘 중 하나라고 생각을 했었는데 아닌걸 보면 뭔가 특수한 케이스라고 생각했습니다. 그 중 제일 이상했던 포인트는 "main thread 의 상태가 waiting on condition 인데 Thread.State 는 Runnable" 인 것이였습니다.
+데드락은 보통 명시적인 락 또는 synchronized 블록에서 발생한다고 생각했기에, 특수한 상황이라 판단하였습니다. 특히 `Thread.State`가 `RUNNABLE`인데, `waiting on condition`이라는 점이 이상하게 느껴졌습니다.
 
-# Java Remote Debugging 
+# Java Remote Debugging
 
-먼저 local 환경에서 재현을 시도하고, IntelliJ 같은 IDE 에서 여러가지 정보를 보려고 해봤지만 로컬 환경에서는 재현이 힘들었습니다. (아마 로컬환경 설정에서는 Datadog 를 실행시키지 않도록 되어있어서 그럴것 같은데, 로컬에서 해당 프로그램이 돌게 만드는게 힘들었습니다) 그래서 pod 에 설정을 하여 remote debugging 을 가능하게 만들고, Intellij 를 통해서 현재 stacktrace 에서 local variable 과 함수인자로 무엇이 들어가 있는지를 확인할수 있었습니다. 그걸 통해서 알아낸 현재 각 thread 의 상태는 다음과 같습니다.
+먼저 로컬 환경에서 문제를 재현하고자 하였으나, Datadog가 비활성화된 설정이어서 재현이 어려웠습니다. 이에 따라 Pod에 Remote Debug 설정을 추가하고, IntelliJ를 통해 Stacktrace 상에서 Local Variable과 함수 인자 등을 확인할 수 있었습니다.
 
-- main thread 에서는 RajinApplication class 를 loading 하고 있고, 그 과정에서 ReactorDebugAgent 에서 등록한 ClassFileTransformer 가 돌다가 blocking 되어있다.
-- dd- 로 시작하는 datadog 관련 thread 들에서도 프로그램이 돌다가, 어떤 class 를 loading 하는 중에 ReactorDebugAgent 의 ClassFileTransformer 가 돌다가 blocking 되어있다.
+확인된 상태는 다음과 같았습니다.
+
+- main 스레드는 RajinApplication 클래스를 로딩 중이며, 이 과정에서 ReactorDebugAgent에 등록된 ClassFileTransformer 실행 중 Block 상태임
+- `dd-`로 시작하는 Datadog 관련 스레드들도 클래스 로딩 중 ReactorDebugAgent의 Transformer 실행 중 Block 상태임
 
 # Stacktrace 기반 조사
 
-ReactorDebugAgent 에서 많은 thread 들이 ReactorDebugAgent 코드에서 blocking 되고 있었기 때문에 [그곳 코드](https://github.com/reactor/reactor-core/blob/486152e0a1103caf9dd6ba50e7957c16b8dd268b/reactor-tools/src/main/java/reactor/tools/agent/ReactorDebugAgent.java#L97)에 대해서 조사하였습니다.
+ReactorDebugAgent 내의 Transformer 코드에서 여러 스레드가 Block되고 있었기 때문에 [해당 코드](https://github.com/reactor/reactor-core/blob/486152e0a1103caf9dd6ba50e7957c16b8dd268b/reactor-tools/src/main/java/reactor/tools/agent/ReactorDebugAgent.java#L97)의 내용을 읽었습니다만, ReactorDebugAgent 는 리액터 코드의 디버깅을 돕기 위해서, ClassFileTransformer 를 등록하는 내용 정도로만 보이고 문제가 될 만한 코드가 보이진 않았습니다.
 
-ReactorDebugAgent 는 리액터 코드 디버깅 목적을 위해서 ClassFileTransformer 를 등록하였고, 현재 블락킹되고 있는 코드는 ClassFileTransformer 안의 내용물이였습니다. 그래서 ClassLoading 과정 중에 deadlock 이 일어날수 있는지 조사를 하다 [다음 글](https://www.farside.org.uk/201510/deadlocks_in_java_class_initialisation)을 발견하였습니다.
+그래서 Deadlock이 클래스 초기화 중에도 발생할 수 있는지를 조사하던 중 [이 글](https://www.farside.org.uk/201510/deadlocks_in_java_class_initialisation)을 발견하였습니다. 핵심은 다음과 같습니다:
+
+> 클래스 초기화 중에 Deadlock이 걸릴 경우, 스레드 상태는 `waiting`임에도 불구하고 `RUNNABLE`로 표시될 수 있다.
 
 ```shell
 "main" prio=10 tid=0x00007efd5000a000 nid=0x51ca in Object.wait() [0x00007efd59d45000]
    java.lang.Thread.State: RUNNABLE
 ```
-> Interestingly, you can see that while both threads are executing an implicit Object.wait(), they’re listed as RUNNABLE rather than WAITING, and there’s no output from the deadlock detector.
 
 현재 겪고 있는 문제와는 조금 다르긴 하지만 중요한 건, class initialization 도중에 데드락이 걸리면 waiting 상태이면서 Thread.State 는 Runnable 이라는 정보를 알게 되었습니다.
 class initialization 관련 로그를 남겨야 겠다고 생각했고 [jvm arguments 로 남길수 있다는걸](https://bugs.openjdk.org/browse/JDK-8316229) 알게되어 `-Xlog:class+init=debug` 으로 로그를 보았습니다.
