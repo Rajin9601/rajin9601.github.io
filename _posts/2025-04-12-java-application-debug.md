@@ -5,7 +5,6 @@ date:   2025-04-12 22:00:00 +0900
 categories: dev
 img-overlay: 0.1
 comments: true
-draft: true
 ---
 
 # 상황 설명
