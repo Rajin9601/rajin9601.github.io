@@ -17,11 +17,27 @@ permalink: /resume/
 
 # Introduction
 
-웹, 앱, 서버를 포함한 다양한 개발을 해왔습니다. 개발하면서 느껴지는 불편함을 개선하는 것이 전체 생산성 향상에 큰 도움이 된다고 생각합니다. 그래서 개발자들이 쉽게 실수하지 않을 만한 환경을 만들기 위해 노력합니다. 이를테면 깨진 유리창을 만들지 않기 위해 전체적인 코드 퀄리티를 신경 쓰며 비교적 큰 규모의 리팩토링을 자주 해왔습니다. 어려운 문제에 대해 동료들과 토론하고 현재 상황에 가장 적합한 해결책을 도출하는 것을 즐깁니다.
+웹, 앱, 서버, DevOps 를 포함한 다양한 개발을 해왔습니다. 개발하면서 느껴지는 불편함을 개선하는 것이 전체 생산성 향상에 큰 도움이 된다고 생각합니다. 그래서 개발자들이 쉽게 실수하지 않을 만한 환경을 만들기 위해 노력합니다. 이를테면 깨진 유리창을 만들지 않기 위해 전체적인 코드 퀄리티를 신경 쓰며 비교적 큰 규모의 리팩토링을 자주 해왔습니다. 어려운 문제에 대해 동료들과 토론하고 현재 상황에 가장 적합한 해결책을 도출하는 것을 즐거워 합니다.
 
 좋은 제품을 개발하기 위해서는 기획, 개발, 디자인 파트 구성원 간의 활발한 소통이 중요하다고 생각합니다. 기획의 흐름을 파악하는 동시에 개발적인 맥락을 이야기함으로써 오해 없는 소통을 추구하며, 이를 바탕으로 최선의 선택을 하려 노력합니다. 기획·개발 단계에서 어려운 부분이 있다면 목표를 향한 새로운 해결책을 적극적으로 제시합니다.
 
 # Experience
+
+## 포트원 DevOps <sup>2024.2 ~ </sup>
+
+- 통합결제시스템 (DevOps 팀 3명)
+- 전사 시스템 운영, 인프라 관리, 모니터링 & 장애 대응, SRE 업무 수행
+- 배포를 DevOps 팀이 수동으로 카나리를 하며 배포하고 있는 것을 자동화하기 위해 argo-rollouts 를 도입하여 개발자들이 안전하게 배포할수 있도록 하는 동시에 DevOps 팀의 업무시간 확보
+- 회사내 가장 큰 메인 DB 를 MySQL 5.5 to 8.0 으로 업그레이드하면서 ProxySQL 을 통해 1분의 점검시간도 없는 무중단 업그레이드를 수행.
+- ECS 를 쓰고 있던 레거시 시스템을 EKS 로 무중단 이전
+- on-premise 환경에 K8s 를 구축하여 개발환경의 EKS 를 대체
+- 여러 troubleshooting 경험
+    - 간헐적으로 pod ready 상태가 안되는 문제를 분석하여 Spring Boot 의 ClassLoader 문제임을 파악하고 해결. ([블로그글](https://www.rajin.me/dev/2025/04/12/java-application-debug.html))
+    - K8s 노드 교체후 cpu usage 가 치솟은 문제의 원인이 [lettuce 의 io_uring](https://github.com/redis/lettuce/blob/2c5f59e531e72fb4c0821970076aac142bd172ef/src/main/java/io/lettuce/core/resource/IOUringProvider.java#L62)이 켜지면서 io_wait 값이 올라가서 문제임을 파악.
+- Tech
+    - EKS, EC2 ASG, Helm, Terraform, Packer
+    - Istio, Argo Rollouts, Argo Workflows, Debezium, ProxySQL
+    - Vault, Keycloak, VaultWarden, Teleport
 
 ## 타다 서버 개발자 <sup>2022.4 ~ 2023.8</sup>
 
@@ -34,13 +50,6 @@ permalink: /resume/
     - Kotlin, Spring Boot, gRPC, Protocol Buffers, MySQL, Hibernate, Redis, SQS
     - Kubernetes, Helm, Terraform
     - [관련 VCNC 개발블로그 글](https://blog-tech.tadatada.com/2019-01-28-tada-system-architecture)
-
-### 티머니 단말기 연동 & 전용선 소통을 위한 추가적인 인프라 작업
-
-- 티머니 단말기를 통한 결제를 할수 있도록 타다 서버와 티머니 서버간의 연동
-- 정산시 타다 정보와 티머니측 정보가 일치하는지 확인하는 시스템 설계 
-- 티머니와 전용선을 통한 HTTPS 소통을 위한 인프라 작업 진행
-- 전용선 연결의 명확한 문제 해결을 위해 연결 로그 분석
 
 ### 무이자 대출 시스템 개발 및 운영
 
@@ -105,16 +114,11 @@ permalink: /resume/
 - 음성통화 : WebRTC, gRPC 를 적용하여 개발
     - 프로토콜 디자인에 참여
 
-## 그 외 경력
-
-- 42 Company (2016.12 - 2017.1) - 컨텐츠 크롤러 개발 & 내부 어드민 효율화
-- Ultracaption (2015.7 - 2015.8) - PLAIN iOS 앱 개발
-
 # Skills
 
-- Kotlin(Java), Swift, Typescript
+- Kotlin(Java), Swift, Typescript, golang
 - Spring Boot, gRPC, Protobuf, Hibernate, Redis, SQS, RxJava/Reactor
-- Kubernetes, Helm, Terraform
+- Kubernetes, Helm, Terraform, AWS, Istio, MySQL, ProxySQL
 
 # Presentations
 
@@ -131,13 +135,4 @@ permalink: /resume/
 - 경기과학고등학교 <sup>2011 ~ 2014</sup>
     - 한국정보올림피아드 전국 본선 금상 <sup>2013</sup>
 
-# Side-Projects
-
-- [SNUTT2](https://snutt.kr/) <sup>2015 ~ 2021</sup>
-    - 5명 중 iOS 담당.
-    - [Link to AppStore](https://itunes.apple.com/kr/app/snutt-서울대학교-시간표-앱/id1215668309?mt=8), [Link to Github](https://github.com/wafflestudio/SNUTT-iOS)
-- [21 Days](http://store.steampowered.com/app/607660/21_Days/)
-    - 총 6명. 2명 프로그래머 중 리드
-    - BIC 2016 Excellence in Narrative Finalist
-
-<div id="update-date">updated at 2023.12.13</div>
+<div id="update-date">updated at 2025.07.08</div>
