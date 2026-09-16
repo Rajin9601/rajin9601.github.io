@@ -28,7 +28,7 @@ permalink: /resume/
 - 통합결제시스템 (DevOps 팀 3명)
 - 전사 시스템 운영, 인프라 관리, 모니터링 & 장애 대응, SRE 업무 수행
 - 배포를 DevOps 팀이 수동으로 카나리를 하며 배포하고 있는 것을 자동화하기 위해 argo-rollouts 를 도입하여 개발자들이 안전하게 배포할수 있도록 하는 동시에 DevOps 팀의 업무시간 확보
-- 회사내 가장 큰 메인 DB 를 MySQL 5.5 to 8.0 으로 업그레이드하면서 ProxySQL 을 통해 1분의 점검시간도 없는 무중단 업그레이드를 수행.
+- 회사 MySQL DB 와 PostgreSQL DB 를 업그레이드하면서 ProxySQL 을 통해 점검시간도 없는 무중단 업그레이드를 수행.
 - ECS 를 쓰고 있던 레거시 시스템을 EKS 로 무중단 이전
 - on-premise 환경에 K8s 를 구축하여 개발환경의 EKS 를 대체
 - 여러 troubleshooting 경험
