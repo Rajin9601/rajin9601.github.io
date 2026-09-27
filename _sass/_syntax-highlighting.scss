@@ -1,120 +1,133 @@
-// Generated: rougify style github.light  (rouge 4.7.0)
-// https://github.com/rouge-ruby/rouge
-// 직접 고치지 말고 위 명령으로 다시 뽑을 것.
+// GitHub Primer "prettylights" 문법 색(light)을 rouge 토큰 클래스에 매핑한다.
+//
+// 색 출처  : https://github.com/primer/primitives
+//            src/tokens/functional/color/syntax.json5   (토큰 -> base 색 참조)
+//            src/tokens/base/color/light/light.json5    (base 색 -> hex)
+// 구조 출처: rougify style github.light  (rouge 4.7.0) 의 토큰 묶음
+//
+// rougify 결과를 그대로 쓰지 않는다. rouge 의 github.light 는 주석, 함수,
+// 태그 색이 Primer 의 현재 light 값과 다르다.
 
-.highlight table td { padding: 5px; }
-.highlight table pre { margin: 0; }
-.highlight, .highlight .w {
-  color: #24292f;
-  background-color: #f6f8fa;
-}
-.highlight .k, .highlight .kd, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kt, .highlight .kv {
-  color: #cf222e;
-}
-.highlight .gr {
-  color: #f6f8fa;
-}
-.highlight .gd {
-  color: #82071e;
-  background-color: #ffebe9;
-}
-.highlight .nb {
-  color: #953800;
-}
-.highlight .nc {
-  color: #953800;
-}
-.highlight .no {
-  color: #953800;
-}
-.highlight .nn {
-  color: #953800;
-}
-.highlight .sr {
-  color: #116329;
-}
-.highlight .na {
-  color: #116329;
-}
-.highlight .nt {
-  color: #116329;
-}
-.highlight .gi {
-  color: #116329;
-  background-color: #dafbe1;
-}
-.highlight .ges {
-  font-weight: bold;
-  font-style: italic;
-}
-.highlight .kc {
-  color: #0550ae;
-}
-.highlight .l, .highlight .ld, .highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
-  color: #0550ae;
-}
-.highlight .sb {
-  color: #0550ae;
-}
-.highlight .bp {
-  color: #0550ae;
-}
-.highlight .ne {
-  color: #0550ae;
-}
-.highlight .nl {
-  color: #0550ae;
-}
-.highlight .py {
-  color: #0550ae;
-}
-.highlight .nv, .highlight .vc, .highlight .vg, .highlight .vi, .highlight .vm {
-  color: #0550ae;
-}
-.highlight .o, .highlight .ow {
-  color: #0550ae;
-}
-.highlight .gh {
-  color: #0550ae;
-  font-weight: bold;
-}
-.highlight .gu {
-  color: #0550ae;
-  font-weight: bold;
-}
-.highlight .s, .highlight .sa, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .se, .highlight .sh, .highlight .sx, .highlight .s1, .highlight .ss {
-  color: #0a3069;
-}
-.highlight .nd {
-  color: #8250df;
-}
-.highlight .nf, .highlight .fm {
-  color: #8250df;
-}
-.highlight .err {
-  color: #f6f8fa;
-  background-color: #82071e;
-}
-.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cp, .highlight .cpf, .highlight .c1, .highlight .cs {
-  color: #6e7781;
-}
-.highlight .gl {
-  color: #6e7781;
-}
-.highlight .gt {
-  color: #6e7781;
-}
-.highlight .ni {
-  color: #24292f;
-}
-.highlight .si {
-  color: #24292f;
-}
-.highlight .ge {
-  color: #24292f;
-  font-style: italic;
-}
-.highlight .gs {
-  color: #24292f;
-  font-weight: bold;
+
+/**
+ * Primer prettylights syntax tokens (light)
+ */
+$pl-fg:                   #1f2328; // fgColor.default
+$pl-bg:                   #f6f8fa; // bgColor.muted
+$pl-comment:              #59636e; // neutral.9
+$pl-constant:             #0550ae; // blue.6
+$pl-string:               #0a3069; // blue.8
+$pl-string-regexp:        #116329; // green.6
+$pl-keyword:              #cf222e; // red.5
+$pl-entity:               #6639ba; // purple.6
+$pl-entity-tag:           #0550ae; // blue.6
+$pl-variable:             #953800; // orange.6
+$pl-markup-heading:       #0550ae; // blue.6
+$pl-markup-deleted-text:  #82071e; // red.7
+$pl-markup-deleted-bg:    #ffebe9; // red.0
+$pl-markup-inserted-text: #116329; // green.6
+$pl-markup-inserted-bg:   #dafbe1; // green.0
+$pl-invalid-text:         #d1242f; // fgColor.danger
+$pl-invalid-bg:           #ffebe9; // bgColor.danger.muted = red.0
+
+
+.highlight {
+    color: $pl-fg;
+    background-color: $pl-bg;
+
+    table td { padding: 5px; }
+    table pre { margin: 0; }
+
+    .w { color: $pl-fg; }
+
+    // keyword
+    .k, .kd, .kn, .kp, .kr, .kt, .kv {
+        color: $pl-keyword;
+    }
+
+    // constant : 숫자, 리터럴, 상수, 변수, 연산자
+    .kc, .l, .ld,
+    .m, .mb, .mf, .mh, .mi, .il, .mo, .mx,
+    .sb, .bp, .ne, .nl, .py,
+    .nv, .vc, .vg, .vi, .vm,
+    .o, .ow {
+        color: $pl-constant;
+    }
+
+    // string
+    .s, .sa, .sc, .dl, .sd, .s2, .se, .sh, .sx, .s1, .ss {
+        color: $pl-string;
+    }
+
+    // string.regexp
+    .sr {
+        color: $pl-string-regexp;
+    }
+
+    // entity.name.tag : HTML/XML 태그와 속성
+    .na, .nt {
+        color: $pl-entity-tag;
+    }
+
+    // variable
+    .nb, .nc, .no, .nn {
+        color: $pl-variable;
+    }
+
+    // entity : 함수, 데코레이터
+    .nd, .nf, .fm {
+        color: $pl-entity;
+    }
+
+    // comment
+    .c, .ch, .cd, .cm, .cp, .cpf, .c1, .cs,
+    .gl, .gt {
+        color: $pl-comment;
+    }
+
+    // 기본색으로 두는 것들
+    .ni, .si {
+        color: $pl-fg;
+    }
+
+    // markup
+    .ge {
+        color: $pl-fg;
+        font-style: italic;
+    }
+
+    .gs {
+        color: $pl-fg;
+        font-weight: bold;
+    }
+
+    .ges {
+        font-weight: bold;
+        font-style: italic;
+    }
+
+    .gh, .gu {
+        color: $pl-markup-heading;
+        font-weight: bold;
+    }
+
+    .gd {
+        color: $pl-markup-deleted-text;
+        background-color: $pl-markup-deleted-bg;
+    }
+
+    .gi {
+        color: $pl-markup-inserted-text;
+        background-color: $pl-markup-inserted-bg;
+    }
+
+    // invalid.illegal
+    .gr {
+        color: $pl-invalid-text;
+    }
+
+    .err {
+        color: $pl-invalid-text;
+        background-color: $pl-invalid-bg;
+    }
 }
