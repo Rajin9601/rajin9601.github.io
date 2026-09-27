@@ -5,6 +5,7 @@ date:   2026-09-27 21:25:00 +0900
 categories: dev
 img-overlay: 0.1
 comments: true
+draft: true
 ---
 
 # MySQL DB Upgrade
