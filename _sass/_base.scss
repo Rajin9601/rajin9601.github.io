@@ -199,6 +199,29 @@ pre {
 
 
 /**
+ * Collapsible details
+ */
+details {
+    margin-bottom: $spacing-unit / 2;
+
+    > summary {
+        font-weight: 400;
+        color: $grey-color-dark;
+        cursor: pointer;
+
+        &:hover {
+            color: $text-color;
+        }
+    }
+
+    &[open] > summary {
+        margin-bottom: $spacing-unit / 4;
+    }
+}
+
+
+
+/**
  * Table
  */
 
