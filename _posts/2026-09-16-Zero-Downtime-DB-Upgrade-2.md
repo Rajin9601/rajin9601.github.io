@@ -20,7 +20,7 @@ draft: true
 
 해당 MySQL DB 는 인프라의 최신화가 되기 전부터 사용되던 DB 이고, 포트원에 레거시 시스템이 존재했기 때문에 해당 DB 를 어디서 사용하고 있는지 불분명한 부분들이 있어 해당 DB 를 사용하는 곳들을 어느 서버들인지 확실하게 트래킹해볼 필요가 있었습니다. 따라서 init_connect 와 procedure 를 통해, 연결이 생길 때마다 MySQL table 에 흔적을 남기도록 하였습니다. show processlist 에는 현재 존재하는 연결만 보이기 때문에, 만약 어느 서버에서 DB 연결이 필요할때만 연경를 맺고 사용하는 형태로 DB 를 사용하고 있었다면(Connection Pool 같은 것이 없이), `show processlist` 만으로는 확신하기가 어려웠습니다.
 
-<details>
+<details markdown="block">
 <summary>구체적인 MySQL query 문들</summary>
 
 ```sql
@@ -123,9 +123,10 @@ MySQL DB 연결 protocol 을 보면 DB 와 클라이언트 간의 handshake 단�
 
 결론적으로 문제들을 봤을 때, mysql_query_rules 와 적당한 설정들로 문제들을 다 해결할 수 있었습니다. DB 를 어떻게 사용하느냐에 따라 모두 다르겠지만, 저희의 경우가 일반적인 경우이지 않을까 생각합니다. 만약 다른 문제들이 있다면 각 문제를 나름의 방식대로 해결을 해야되지 않을까 생각합니다. 글을 이해하는데 도움이 되었으면 하여, 결론적으로 사용된 mysql_query_rules 를 첨부해 놓습니다.
 
-<details>
+<details markdown="block">
 <summary>mysql_query_rules</summary>
-```
+
+```sql
 INSERT INTO mysql_query_rules (
     rule_id,
     active,
@@ -200,6 +201,7 @@ VALUES
     'for multiplexing & mysql 8.0 backends. this is chain rule from rule 1.'
 );
 ```
+
 </details>
 
 ## SwitchOver 스크립트
