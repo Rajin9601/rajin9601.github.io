@@ -19,9 +19,9 @@ AWS Managed DB 를 사용하다보면, AWS 에서 DB 버전 업그레이드를 �
 1. 새로운 DB (Green DB)를 만들어서 이전 DB (Blue DB)로부터 replication 을 설정하여 이전 DB의 변경사항을 따라잡도록 설정합니다.
 2. 새로운 DB 를 read_only 로서 여러가지 테스트를 해봅니다.
 3. 문제가 없을것 같으면 새로운 DB 로 Switchover 를 진행합니다.
-  1. 이전 DB 에 있는 연결들을 모두 끊습니다.
-  2. 새로운 DB 가 이전 DB 의 변경사항을 모두 따라잡을때까지 기다립니다.
-  3. DB 연결에 사용되던 endpoint 의 DNS record 들을 변경하여 새로운 DB 를 가르키도록 만듭니다.
+   1. 이전 DB 에 있는 연결들을 모두 끊습니다.
+   2. 새로운 DB 가 이전 DB 의 변경사항을 모두 따라잡을때까지 기다립니다.
+   3. DB 연결에 사용되던 endpoint 의 DNS record 들을 변경하여 새로운 DB 를 가르키도록 만듭니다.
 
 << 여기에 visualization 넣기 >>
 
@@ -40,23 +40,23 @@ AWS RDS Blue-Green Deployment 에 있는 문제들을 해결해야만 무중단 
 2. 클라이언트(서버)들은 DB Proxy 를 바라보도록 하고, DB Proxy 는 이전 DB 로 연결시켜줍니다. 
 3. 새로운 DB 를 read_only 로서 여러가지 테스트를 해봅니다.
 4. 문제가 없을것 같으면 새로운 DB 로 Switchover 를 진행합니다.
-  1. DB Proxy 에서 이전 DB 사용을 draining 합니다.
-    1. 진행중인 transaction 이 있는 connection 은 해당 transaction 이 끝날때까지 기다립니다.
-    2. Client 에서 새로운 transaction 을 열려고 하면, DB Proxy 가 뒷단 DB 에 전달을 안해주고 가지고 있습니다.
-    3. 진행중인 transaction 이 모두 끝날때까지 대기하여 draining 완료를 기다립니다.
-  2. 새로운 DB 가 이전 DB 의 변경사항을 모두 따라잡을때까지 기다립니다.
-  3. DB Proxy 에서 새로운 DB 를 사용하도록 합니다.
-    1. DB Proxy 가 뒷단 DB 에 전달을 안해주고 있던 query 를 새로운 DB 에 이제서야 전달해줍니다.
-    2. 새로운 DB 에서 응답이 온것을 Client 에 전달을 정상적으로 해주기 때문에, Client 입장에서 단순히 query 가 느려진 것처럼 느껴집니다.
+   1. DB Proxy 에서 이전 DB 사용을 draining 합니다.
+      1. 진행중인 transaction 이 있는 connection 은 해당 transaction 이 끝날때까지 기다립니다.
+      2. Client 에서 새로운 transaction 을 열려고 하면, DB Proxy 가 뒷단 DB 에 전달을 안해주고 가지고 있습니다.
+      3. 진행중인 transaction 이 모두 끝날때까지 대기하여 draining 완료를 기다립니다.
+   2. 새로운 DB 가 이전 DB 의 변경사항을 모두 따라잡을때까지 기다립니다.
+   3. DB Proxy 에서 새로운 DB 를 사용하도록 합니다.
+      1. DB Proxy 가 뒷단 DB 에 전달을 안해주고 있던 query 를 새로운 DB 에 이제서야 전달해줍니다.
+      2. 새로운 DB 에서 응답이 온것을 Client 에 전달을 정상적으로 해주기 때문에, Client 입장에서 단순히 query 가 느려진 것처럼 느껴집니다.
 
 << 여기에 visualization 넣기 >>
 
 이렇게 업그레이드를 하게 되면, draining 되는데 시간이 2초 걸렸다고 했을 때, 그때의 서버의 모든 요청의 latency 가 2초로 증가하긴 하지만 서버의 응답은 정상적으로 나올것이기에 다운타임이 생기진 않게 됩니다. 이런 무중단 업그레이드를 하기 위해서는 약간의 서버에 대한 가정들이 필요합니다.
 
 1. 서버에서는 DB 에 transaction 을 길게 잡고 있지 않아야 합니다.
-  - draining 할때 기다리는 시간이 너무 길어지면, 요청의 latency 가 그만큼 길어지기 때문에 장애상황과 동일한 수준으로 길어지면 문제가 됩니다.
+   - draining 할때 기다리는 시간이 너무 길어지면, 요청의 latency 가 그만큼 길어지기 때문에 장애상황과 동일한 수준으로 길어지면 문제가 됩니다.
 2. DB 에 transaction 을 잡고 있으면서 새롭게 DB transaction 을 여는 코드가 Switchover 시, 동작하면 안됩니다.
-  - Switchover 를 할때, 새로운 DB transaction 에 열려야 이전 transaction 이 끝나는데, DB Proxy 는 새로운 transaction 은 딜레이 시키고, 기존 transaction 은 끝날때까지 기다리면서 일종의 deadlock 이 발생하면서 draining 이 실패하게 됩니다.
+   - Switchover 를 할때, 새로운 DB transaction 에 열려야 이전 transaction 이 끝나는데, DB Proxy 는 새로운 transaction 은 딜레이 시키고, 기존 transaction 은 끝날때까지 기다리면서 일종의 deadlock 이 발생하면서 draining 이 실패하게 됩니다.
 
 이 두가지 가정들에 해당하는 서버 프로그램들은 상대적으로 많을것이고, 또한 항상 이 두가정을 만족해야 되는것이 아니라 Switchover 하는 순간의 요청들에 대해서만 만족하면 되는 가정들이기에 두 가정에 해당하는 request 종류가 희귀하다면, 확률을 믿고 Switchover 를 될때까지 시도를 하는 방법도 존재합니다.
 

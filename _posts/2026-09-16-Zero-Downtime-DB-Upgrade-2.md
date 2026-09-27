@@ -207,8 +207,8 @@ VALUES
 SwitchOver 의 과정을 자세히 설명하면 다음과 같습니다.
 
 1. 5초 타이머를 시작합니다. 만약 밑 과정이 5초를 넘기게 되면, switchover 를 취소하고 다시 이전 DB 를 사용하도록 합니다.
-  1. DB Proxy 에서 이전 DB 사용을 draining 합니다.
-  2. 새로운 DB 가 이전 DB 의 변경사항을 모두 따라잡을때까지 기다립니다.
+   1. DB Proxy 에서 이전 DB 사용을 draining 합니다.
+   2. 새로운 DB 가 이전 DB 의 변경사항을 모두 따라잡을때까지 기다립니다.
 2. DB Proxy 에서 새로운 DB 를 사용하도록 합니다.
 
 ### 이전 DB 사용 draining 
