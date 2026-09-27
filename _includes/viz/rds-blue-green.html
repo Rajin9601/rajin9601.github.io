@@ -1,0 +1,290 @@
+<style>
+.bgd {
+  --bgd-blue: #2563eb;
+  --bgd-green: #2B8728;
+  --bgd-red: #BA313B;
+  --bgd-amber: #BA6C31;
+  --bgd-grey: #9aa0a6;
+  --bgd-line: #d7dade;
+  border: 1px solid var(--bgd-line);
+  border-radius: 10px;
+  padding: 14px 16px 12px;
+  background: #fff;
+  letter-spacing: 0;
+  text-align: left;
+}
+.bgd-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; font-size: 12px; margin-bottom: 8px;
+}
+.bgd-stepno { color: var(--bgd-grey); font-weight: 500; }
+.bgd-status {
+  font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  border: 1px solid currentColor; white-space: nowrap; color: var(--bgd-green);
+}
+.bgd.is-down .bgd-status { color: var(--bgd-red); background: #fdeeef; }
+
+.bgd svg { display: block; width: 100%; height: auto; }
+.bgd text { font-family: inherit; fill: #111; }
+.bgd .t-title { font-size: 15px; font-weight: 600; }
+.bgd .t-sub { font-size: 11.5px; fill: #6b7076; }
+.bgd .t-tag { font-size: 11.5px; font-weight: 600; }
+.bgd .t-hdr { font-size: 11px; font-weight: 600; fill: #9aa0a6; letter-spacing: .4px; }
+.bgd .t-mono { font-size: 12.5px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #444; }
+.bgd .t-note { font-size: 11px; fill: #8b9097; }
+
+.bgd .box { fill: #fff; stroke: var(--bgd-line); stroke-width: 1.5px; }
+.bgd .box-blue { fill: #eff4fe; stroke: var(--bgd-blue); }
+.bgd .box-green { fill: #eef6ed; stroke: var(--bgd-green); }
+.bgd .box-dns { fill: #fbfbfc; stroke: #b9bdc2; stroke-width: 1.5px; transition: stroke .35s; }
+.bgd.f-dnsgreen .box-dns { stroke: var(--bgd-green); }
+
+.bgd .link { fill: none; stroke: var(--bgd-line); stroke-width: 2px; transition: opacity .35s, stroke .35s; }
+.bgd .link.on { stroke: var(--bgd-blue); stroke-dasharray: 7 6; animation: bgd-flow .9s linear infinite; }
+.bgd .link.on-green { stroke: var(--bgd-green); stroke-dasharray: 7 6; animation: bgd-flow .9s linear infinite; }
+.bgd .link.cut { stroke: var(--bgd-red); stroke-dasharray: 3 7; opacity: .75; }
+.bgd .link.ghost { stroke: #c9ced3; stroke-dasharray: 2 7; opacity: .9; }
+.bgd .link.hide { opacity: 0; }
+@keyframes bgd-flow { from { stroke-dashoffset: 26; } to { stroke-dashoffset: 0; } }
+
+.bgd .leader { fill: none; stroke-width: 1.5px; stroke-dasharray: 3 4; transition: opacity .35s; }
+.bgd .leader.blue { stroke: #9bb4ef; }
+.bgd .leader.green { stroke: #8cba89; }
+
+.bgd .g-green, .bgd .g-repl, .bgd .g-test, .bgd .g-cut, .bgd .g-cache { opacity: 0; transition: opacity .35s; }
+.bgd .g-green { opacity: .16; }
+.bgd.f-green .g-green { opacity: 1; }
+.bgd.f-repl .g-repl, .bgd.f-catchup .g-repl { opacity: 1; }
+.bgd.f-catchup .repl-line { stroke-width: 3px; stroke-dasharray: 6 5; animation: bgd-flow .55s linear infinite; }
+.bgd.f-test .g-test { opacity: 1; }
+.bgd.f-cut .g-cut { opacity: 1; }
+.bgd.f-cache .g-cache { opacity: 1; }
+.bgd.f-blueoff .box-blue { fill: #f4f5f6; stroke: var(--bgd-line); }
+.bgd.f-blueoff .db-blue-title { fill: #9aa0a6; }
+
+.bgd-desc { font-size: 14px; line-height: 1.6; text-align: left; margin: 10px 0 12px; min-height: 3.2em; }
+.bgd-desc b { font-weight: 600; }
+.bgd-ctrl { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.bgd-ctrl button {
+  font: inherit; font-size: 13px; line-height: 1;
+  border: 1px solid var(--bgd-line); background: #fff; color: #444;
+  border-radius: 6px; padding: 7px 10px; cursor: pointer;
+}
+.bgd-ctrl button:hover { border-color: #b4b8bd; background: #f7f8f9; }
+.bgd-ctrl button[disabled] { opacity: .4; cursor: default; }
+.bgd-dots { display: flex; gap: 4px; margin: 0 4px; flex-wrap: wrap; }
+.bgd-dots button { padding: 6px 9px; color: #888; }
+.bgd-dots button[aria-current="true"] { background: #111; border-color: #111; color: #fff; }
+.bgd-play { margin-left: auto; }
+
+@media screen and (max-width: 600px) {
+  .bgd { padding: 12px 10px 10px; }
+  .bgd-desc { font-size: 13px; min-height: 5em; }
+  .bgd-dots button { padding: 6px 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bgd .link.on, .bgd .link.on-green, .bgd.f-catchup .repl-line { animation: none; }
+}
+</style>
+
+<figure>
+<div class="bgd" id="bgd1">
+  <div class="bgd-head">
+    <span class="bgd-stepno" data-bgd="stepno"></span>
+    <span class="bgd-status" data-bgd="status"></span>
+  </div>
+
+  <svg viewBox="0 0 760 380" role="img" aria-label="AWS RDS Blue-Green Deployments switchover diagram">
+    <defs>
+      <marker id="bgd1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#2B8728"></path>
+      </marker>
+      <marker id="bgd1-lb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#9bb4ef"></path>
+      </marker>
+      <marker id="bgd1-lg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#8cba89"></path>
+      </marker>
+    </defs>
+
+    <!-- connections: app server -> db (direct) -->
+    <path class="link" data-bgd="wb0" d="M140 111 C 260 111, 330 88, 472 88"></path>
+    <path class="link" data-bgd="wb1" d="M140 169 C 260 169, 330 88, 472 88"></path>
+    <path class="link" data-bgd="wb2" d="M140 227 C 260 227, 330 88, 472 88"></path>
+    <path class="link" data-bgd="wg0" d="M140 111 C 260 111, 330 292, 472 292"></path>
+    <path class="link" data-bgd="wg1" d="M140 169 C 260 169, 330 292, 472 292"></path>
+    <path class="link" data-bgd="wg2" d="M140 227 C 260 227, 330 292, 472 292"></path>
+
+    <!-- app servers -->
+    <g>
+      <rect class="box" x="14" y="88" width="126" height="46" rx="8"></rect>
+      <rect class="box" x="14" y="146" width="126" height="46" rx="8"></rect>
+      <rect class="box" x="14" y="204" width="126" height="46" rx="8"></rect>
+      <text class="t-sub" x="77" y="116" text-anchor="middle">App 서버 1</text>
+      <text class="t-sub" x="77" y="174" text-anchor="middle">App 서버 2</text>
+      <text class="t-sub" x="77" y="232" text-anchor="middle">App 서버 3</text>
+    </g>
+
+    <!-- dns cache warning -->
+    <g class="g-cache">
+      <rect x="8" y="44" width="212" height="26" rx="13" fill="#fdf2e9" stroke="#BA6C31" stroke-width="1"></rect>
+      <text class="t-tag" x="114" y="61" text-anchor="middle" fill="#BA6C31">DNS 캐시 TTL 만료 대기</text>
+    </g>
+
+    <!-- dns record card -->
+    <g>
+      <rect class="box box-dns" x="150" y="276" width="244" height="88" rx="8"></rect>
+      <text class="t-hdr" x="166" y="298">DNS 레코드</text>
+      <text class="t-note" x="378" y="298" text-anchor="end">연결 대상만 정합니다</text>
+      <line x1="150" y1="308" x2="394" y2="308" stroke="#e7e9eb" stroke-width="1"></line>
+      <text class="t-mono" x="166" y="330">db.example.com</text>
+      <text class="t-tag" x="166" y="352" data-bgd="target">→ Blue DB</text>
+    </g>
+
+    <!-- leader: dns record -> target connection bundle -->
+    <path class="leader blue" data-bgd="ldb" d="M300 274 L 300 142" marker-end="url(#bgd1-lb)"></path>
+    <path class="leader green" data-bgd="ldg" d="M300 274 L 300 244" marker-end="url(#bgd1-lg)"></path>
+
+    <!-- replication -->
+    <g class="g-repl">
+      <path class="repl-line" d="M562 134 L 562 246" fill="none" stroke="#2B8728" stroke-width="2" marker-end="url(#bgd1-arrow)"></path>
+      <text class="t-tag" x="576" y="195" fill="#2B8728" data-bgd="repl">replication</text>
+    </g>
+
+    <!-- blue db -->
+    <g>
+      <rect class="box box-blue" x="472" y="42" width="180" height="92" rx="10"></rect>
+      <text class="t-title db-blue-title" x="562" y="82" text-anchor="middle" fill="#2563eb">Blue DB</text>
+      <text class="t-sub" x="562" y="106" text-anchor="middle">이전 버전 (현재 운영)</text>
+    </g>
+
+    <!-- green db -->
+    <g class="g-green">
+      <rect class="box box-green" x="472" y="246" width="180" height="92" rx="10"></rect>
+      <text class="t-title" x="562" y="286" text-anchor="middle" fill="#2B8728">Green DB</text>
+      <text class="t-sub" x="562" y="310" text-anchor="middle">새 버전</text>
+      <g class="g-test">
+        <rect x="472" y="350" width="180" height="24" rx="12" fill="#eef6ed" stroke="#2B8728" stroke-width="1"></rect>
+        <text class="t-tag" x="562" y="366" text-anchor="middle" fill="#2B8728">read_only 테스트 중</text>
+      </g>
+    </g>
+
+    <!-- cut marks -->
+    <g class="g-cut">
+      <text class="t-tag" x="424" y="58" text-anchor="end" fill="#BA313B">모든 연결 끊김</text>
+      <circle cx="444" cy="89" r="11" fill="#fff" stroke="#BA313B" stroke-width="1.5"></circle>
+      <path d="M439 84 L449 94 M449 84 L439 94" stroke="#BA313B" stroke-width="2.5" stroke-linecap="round"></path>
+    </g>
+  </svg>
+
+  <p class="bgd-desc" data-bgd="desc"></p>
+
+  <div class="bgd-ctrl">
+    <button type="button" data-bgd="prev" aria-label="이전 단계">◀</button>
+    <div class="bgd-dots" data-bgd="dots"></div>
+    <button type="button" data-bgd="next" aria-label="다음 단계">▶</button>
+    <button type="button" class="bgd-play" data-bgd="play">▶ 자동 재생</button>
+  </div>
+</div>
+<figcaption>AWS RDS Blue-Green Deployments 의 Switchover 과정</figcaption>
+</figure>
+
+<script>
+(function () {
+  var root = document.getElementById('bgd1');
+  if (!root) return;
+
+  var STEPS = [
+    { wire: 'blue', dns: 'blue', flags: [], down: false,
+      title: '시작',
+      desc: 'App 서버는 DNS 로 <b>db.example.com</b> 을 찾아서 Blue DB 에 직접 연결합니다. 연결 자체는 DNS 를 거치지 않고, DNS 는 어느 DB 로 연결할지만 정해줍니다.' },
+    { wire: 'blue', dns: 'blue', flags: ['green', 'repl'], down: false,
+      title: '1. Green DB 생성',
+      desc: '새 버전의 Green DB 를 만들고, Blue DB 로부터 replication 을 걸어 변경사항을 따라가게 합니다.' },
+    { wire: 'blue', dns: 'blue', flags: ['green', 'repl', 'test'], down: false,
+      title: '2. Green DB 테스트',
+      desc: 'Green DB 는 read_only 입니다. 운영 트래픽은 그대로 Blue DB 로 가는 동안, Green DB 로 여러가지 테스트를 합니다.' },
+    { wire: 'blue-cut', dns: 'blue', flags: ['green', 'repl', 'cut'], down: true,
+      title: '3-1. 연결 끊기',
+      desc: 'Blue DB 의 연결을 모두 끊습니다. 여기서부터 다운타임이 시작됩니다. 진행중이던 요청은 실패하고, 서버에 재시도 로직이 없으면 그대로 에러가 됩니다.' },
+    { wire: 'blue-cut', dns: 'blue', flags: ['green', 'catchup', 'cut'], down: true, repl: '마지막 변경사항 따라잡는 중',
+      title: '3-2. 복제 대기',
+      desc: 'Green DB 가 Blue DB 의 마지막 변경사항까지 모두 따라잡을 때까지 기다립니다.' },
+    { wire: 'blue-cut', dns: 'green', ghost: true, flags: ['green', 'cut', 'cache'], down: true,
+      title: '3-3. DNS 레코드 변경',
+      desc: 'DNS 레코드가 Green DB 를 가리키도록 바뀌었습니다. <b>하지만 서버는 캐시된 이전 주소를 그대로 보고 있어서, 캐시가 만료될 때까지는 새 DB 로 연결하지 못합니다.</b>' },
+    { wire: 'green', dns: 'green', flags: ['green', 'cache', 'blueoff'], down: false,
+      title: '완료',
+      desc: 'DNS 캐시가 만료된 서버부터 Green DB 로 다시 연결됩니다. 3-1 부터 여기까지가 다운타임입니다.' }
+  ];
+
+  var ALL = ['green', 'repl', 'catchup', 'test', 'cut', 'cache', 'blueoff', 'dnsgreen'];
+  var el = {};
+  var keys = ['stepno', 'status', 'desc', 'target', 'repl', 'prev', 'next', 'play', 'dots', 'ldb', 'ldg'];
+  [0, 1, 2].forEach(function (i) { keys.push('wb' + i, 'wg' + i); });
+  keys.forEach(function (k) { el[k] = root.querySelector('[data-bgd="' + k + '"]'); });
+
+  var dots = STEPS.map(function (s, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = String(i + 1);
+    b.setAttribute('aria-label', (i + 1) + '단계: ' + s.title);
+    b.addEventListener('click', function () { stop(); render(i); });
+    el.dots.appendChild(b);
+    return b;
+  });
+
+  var cur = 0;
+  var timer = null;
+
+  function render(i) {
+    cur = (i + STEPS.length) % STEPS.length;
+    var s = STEPS[cur];
+
+    ALL.forEach(function (f) { root.classList.remove('f-' + f); });
+    s.flags.forEach(function (f) { root.classList.add('f-' + f); });
+    if (s.dns === 'green') root.classList.add('f-dnsgreen');
+    root.classList.toggle('is-down', s.down);
+
+    var blueCls = s.wire === 'blue' ? 'on' : (s.wire === 'blue-cut' ? 'cut' : 'hide');
+    var greenCls = s.wire === 'green' ? 'on-green' : (s.ghost ? 'ghost' : 'hide');
+    [0, 1, 2].forEach(function (n) {
+      el['wb' + n].setAttribute('class', 'link ' + blueCls);
+      el['wg' + n].setAttribute('class', 'link ' + greenCls);
+    });
+
+    el.ldb.style.opacity = s.dns === 'blue' ? '1' : '0';
+    el.ldg.style.opacity = s.dns === 'green' ? '1' : '0';
+
+    el.stepno.textContent = 'STEP ' + (cur + 1) + ' / ' + STEPS.length;
+    el.status.textContent = s.down ? '다운타임' : '서비스 정상';
+    el.desc.innerHTML = '<b>' + s.title + '</b> — ' + s.desc;
+    el.target.textContent = '→ ' + (s.dns === 'blue' ? 'Blue DB' : 'Green DB');
+    el.target.setAttribute('fill', s.dns === 'blue' ? '#2563eb' : '#2B8728');
+    el.repl.textContent = s.repl || 'replication';
+
+    dots.forEach(function (b, n) { b.setAttribute('aria-current', n === cur ? 'true' : 'false'); });
+    el.prev.disabled = cur === 0;
+    el.next.disabled = cur === STEPS.length - 1;
+  }
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    el.play.textContent = '▶ 자동 재생';
+  }
+
+  el.prev.addEventListener('click', function () { stop(); render(cur - 1); });
+  el.next.addEventListener('click', function () { stop(); render(cur + 1); });
+  el.play.addEventListener('click', function () {
+    if (timer) { stop(); return; }
+    if (cur === STEPS.length - 1) render(0);
+    el.play.textContent = '❚❚ 정지';
+    timer = setInterval(function () {
+      if (cur === STEPS.length - 1) { stop(); return; }
+      render(cur + 1);
+    }, 2400);
+  });
+
+  render(0);
+})();
+</script>

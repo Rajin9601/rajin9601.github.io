@@ -1,0 +1,397 @@
+<style>
+.dps {
+  --dps-blue: #2563eb;
+  --dps-green: #2B8728;
+  --dps-amber: #BA6C31;
+  --dps-grey: #9aa0a6;
+  --dps-line: #d7dade;
+  border: 1px solid var(--dps-line);
+  border-radius: 10px;
+  padding: 14px 16px 12px;
+  background: #fff;
+  letter-spacing: 0;
+  text-align: left;
+}
+.dps-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; font-size: 12px; margin-bottom: 8px;
+}
+.dps-stepno { color: var(--dps-grey); font-weight: 500; }
+.dps-status {
+  font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  border: 1px solid currentColor; white-space: nowrap; color: var(--dps-green);
+}
+.dps.is-warn .dps-status { color: var(--dps-amber); background: #fdf2e9; }
+
+.dps svg { display: block; width: 100%; height: auto; }
+.dps text { font-family: inherit; fill: #111; }
+.dps .t-title { font-size: 16px; font-weight: 600; }
+.dps .t-sub { font-size: 12px; fill: #6b7076; }
+.dps .t-hdr { font-size: 11.5px; font-weight: 600; fill: #9aa0a6; letter-spacing: .3px; }
+.dps .t-state { font-size: 12px; font-weight: 600; }
+.dps .t-tag { font-size: 12px; font-weight: 600; }
+.dps .t-note { font-size: 11.5px; fill: #8b9097; }
+
+.dps .box { fill: #fff; stroke: var(--dps-line); stroke-width: 1.5px; }
+.dps .box-proxy { fill: #fbfbfc; stroke: #8b9097; }
+.dps .box-slot { fill: #fff; stroke: var(--dps-line); stroke-width: 1px; transition: stroke .3s, fill .3s; }
+.dps .box-slot.empty { stroke-dasharray: 4 4; fill: #fafbfb; }
+.dps .box-slot.wait { stroke-dasharray: 4 4; stroke: var(--dps-amber); fill: #fdf7f1; }
+.dps .box-blue { fill: #eff4fe; stroke: var(--dps-blue); }
+.dps .box-green { fill: #eef6ed; stroke: var(--dps-green); }
+
+.dps .link { fill: none; stroke: var(--dps-line); stroke-width: 2px; transition: opacity .3s, stroke .3s; }
+.dps .link.run { stroke: var(--dps-blue); stroke-dasharray: 7 6; animation: dps-flow .9s linear infinite; }
+.dps .link.recv { stroke: var(--dps-green); stroke-dasharray: 7 6; animation: dps-flow .9s linear infinite; }
+.dps .link.hold { stroke: var(--dps-amber); stroke-dasharray: 2 8; animation: dps-flow 2.4s linear infinite; }
+.dps .link.idle { stroke: var(--dps-line); }
+.dps .link-back { opacity: 0; }
+.dps .link-back.show { opacity: 1; }
+.dps .link-back.blue { stroke: var(--dps-blue); }
+.dps .link-back.green { stroke: var(--dps-green); }
+@keyframes dps-flow { from { stroke-dashoffset: 26; } to { stroke-dashoffset: 0; } }
+
+.dps .g-green, .dps .g-repl { opacity: 0; transition: opacity .35s; }
+.dps .g-green { opacity: .16; }
+.dps.f-green .g-green { opacity: 1; }
+.dps.f-repl .g-repl, .dps.f-catchup .g-repl { opacity: 1; }
+.dps.f-catchup .repl-line { stroke-width: 3px; stroke-dasharray: 6 5; animation: dps-flow .55s linear infinite; }
+.dps.f-blueoff .box-blue { fill: #f4f5f6; stroke: var(--dps-line); }
+.dps.f-blueoff .db-blue-title { fill: #9aa0a6; }
+
+.dps .mark { transition: opacity .3s; }
+.dps .pill rect { fill: #fff; stroke: var(--dps-grey); stroke-width: 1px; }
+.dps .pill text { fill: #6b7076; }
+.dps .pill.on rect { fill: #eff4fe; stroke: var(--dps-blue); }
+.dps .pill.on text { fill: #2563eb; }
+.dps .pill.warn rect { fill: #fdf2e9; stroke: var(--dps-amber); }
+.dps .pill.warn text { fill: #8a4f22; }
+.dps .pill.go rect { fill: #eef6ed; stroke: var(--dps-green); }
+.dps .pill.go text { fill: #2B6E27; }
+.dps .pill.off rect { fill: #f4f5f6; stroke: var(--dps-line); }
+.dps .pill.off text { fill: #9aa0a6; }
+
+.dps-meter { display: flex; align-items: center; gap: 10px; font-size: 12px; margin-top: 10px; }
+.dps-meter-label { color: #6b7076; white-space: nowrap; }
+.dps-bar { flex: 1; height: 8px; border-radius: 4px; background: #eef0f2; overflow: hidden; }
+.dps-bar-fill { height: 100%; width: 2%; border-radius: 4px; background: var(--dps-green); transition: width .5s ease, background-color .35s; }
+.dps.is-warn .dps-bar-fill { background: var(--dps-amber); }
+.dps-meter-val { font-variant-numeric: tabular-nums; color: #444; font-weight: 600; min-width: 4.2em; text-align: right; }
+
+.dps-desc { font-size: 14px; line-height: 1.6; text-align: left; margin: 10px 0 12px; min-height: 4.8em; }
+.dps-desc b { font-weight: 600; }
+.dps-ctrl { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.dps-ctrl button {
+  font: inherit; font-size: 13px; line-height: 1;
+  border: 1px solid var(--dps-line); background: #fff; color: #444;
+  border-radius: 6px; padding: 7px 10px; cursor: pointer;
+}
+.dps-ctrl button:hover { border-color: #b4b8bd; background: #f7f8f9; }
+.dps-ctrl button[disabled] { opacity: .4; cursor: default; }
+.dps-dots { display: flex; gap: 4px; margin: 0 4px; flex-wrap: wrap; }
+.dps-dots button { padding: 6px 8px; color: #888; }
+.dps-dots button[aria-current="true"] { background: #111; border-color: #111; color: #fff; }
+.dps-play { margin-left: auto; }
+
+@media screen and (max-width: 600px) {
+  .dps { padding: 12px 10px 10px; }
+  .dps-desc { font-size: 13px; min-height: 6.4em; }
+  .dps-dots button { padding: 6px 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dps .link.run, .dps .link.recv, .dps .link.hold, .dps.f-catchup .repl-line { animation: none; }
+}
+</style>
+
+<figure>
+<div class="dps" id="dps1">
+  <div class="dps-head">
+    <span class="dps-stepno" data-dps="stepno"></span>
+    <span class="dps-status" data-dps="status"></span>
+  </div>
+
+  <svg viewBox="0 0 860 400" role="img" aria-label="DB Proxy 를 사용한 무중단 switchover diagram">
+    <defs>
+      <marker id="dps1-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#2B8728"></path>
+      </marker>
+      <marker id="dps1-asg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#6b7076"></path>
+      </marker>
+    </defs>
+
+    <!-- app servers -->
+    <g>
+      <rect class="box" x="8" y="118" width="104" height="40" rx="8"></rect>
+      <rect class="box" x="8" y="182" width="104" height="40" rx="8"></rect>
+      <rect class="box" x="8" y="246" width="104" height="40" rx="8"></rect>
+      <text class="t-sub" x="60" y="143" text-anchor="middle">App 서버 1</text>
+      <text class="t-sub" x="60" y="207" text-anchor="middle">App 서버 2</text>
+      <text class="t-sub" x="60" y="271" text-anchor="middle">App 서버 3</text>
+      <text class="t-tag" x="60" y="312" text-anchor="middle" fill="#2B8728">앞단 연결은</text>
+      <text class="t-tag" x="60" y="330" text-anchor="middle" fill="#2B8728">끊기지 않음</text>
+    </g>
+
+    <!-- proxy background -->
+    <g>
+      <rect class="box box-proxy" x="150" y="36" width="380" height="320" rx="10"></rect>
+      <text class="t-title" x="340" y="66" text-anchor="middle">DB Proxy</text>
+      <text class="t-hdr" x="241" y="96" text-anchor="middle">앞단 연결</text>
+      <text class="t-hdr" x="432" y="96" text-anchor="middle">뒷단 연결</text>
+      <line x1="166" y1="310" x2="514" y2="310" stroke="#e7e9eb" stroke-width="1"></line>
+      <text class="t-note" x="340" y="332" text-anchor="middle">transaction 이 끝나면 뒷단 연결은 반납되고, 다음 query 에 다시 배정됩니다</text>
+    </g>
+
+    <!-- client links -->
+    <path class="link" data-dps="cl0" d="M112 138 L 166 138"></path>
+    <path class="link" data-dps="cl1" d="M112 202 L 166 202"></path>
+    <path class="link" data-dps="cl2" d="M112 266 L 166 266"></path>
+
+    <!-- backend links -->
+    <path class="link link-back" data-dps="bl0-blue" d="M514 138 C 552 138, 562 102, 600 102"></path>
+    <path class="link link-back" data-dps="bl1-blue" d="M514 202 C 552 202, 562 102, 600 102"></path>
+    <path class="link link-back" data-dps="bl2-blue" d="M514 266 C 552 266, 562 102, 600 102"></path>
+    <path class="link link-back" data-dps="bl0-green" d="M514 138 C 552 138, 562 296, 600 296"></path>
+    <path class="link link-back" data-dps="bl1-green" d="M514 202 C 552 202, 562 296, 600 296"></path>
+    <path class="link link-back" data-dps="bl2-green" d="M514 266 C 552 266, 562 296, 600 296"></path>
+
+    <!-- db proxy slots -->
+    <g>
+      <rect class="box box-slot" x="166" y="112" width="150" height="52" rx="7"></rect>
+      <rect class="box box-slot" x="166" y="176" width="150" height="52" rx="7"></rect>
+      <rect class="box box-slot" x="166" y="240" width="150" height="52" rx="7"></rect>
+      <text class="t-sub" x="241" y="132" text-anchor="middle">서버 1 ↔ Proxy</text>
+      <text class="t-sub" x="241" y="196" text-anchor="middle">서버 2 ↔ Proxy</text>
+      <text class="t-sub" x="241" y="260" text-anchor="middle">서버 3 ↔ Proxy</text>
+      <text class="t-state" x="241" y="152" text-anchor="middle" data-dps="f0"></text>
+      <text class="t-state" x="241" y="216" text-anchor="middle" data-dps="f1"></text>
+      <text class="t-state" x="241" y="280" text-anchor="middle" data-dps="f2"></text>
+
+      <rect class="box box-slot" x="350" y="112" width="164" height="52" rx="7" data-dps="bx0"></rect>
+      <rect class="box box-slot" x="350" y="176" width="164" height="52" rx="7" data-dps="bx1"></rect>
+      <rect class="box box-slot" x="350" y="240" width="164" height="52" rx="7" data-dps="bx2"></rect>
+      <text class="t-tag" x="432" y="132" text-anchor="middle" data-dps="bd0"></text>
+      <text class="t-tag" x="432" y="196" text-anchor="middle" data-dps="bd1"></text>
+      <text class="t-tag" x="432" y="260" text-anchor="middle" data-dps="bd2"></text>
+      <text class="t-sub" x="432" y="152" text-anchor="middle" data-dps="bs0"></text>
+      <text class="t-sub" x="432" y="216" text-anchor="middle" data-dps="bs1"></text>
+      <text class="t-sub" x="432" y="280" text-anchor="middle" data-dps="bs2"></text>
+
+      <path class="mark" data-dps="ar0" d="M320 138 L 344 138" stroke="#6b7076" stroke-width="1.5" fill="none" marker-end="url(#dps1-asg)"></path>
+      <path class="mark" data-dps="ar1" d="M320 202 L 344 202" stroke="#6b7076" stroke-width="1.5" fill="none" marker-end="url(#dps1-asg)"></path>
+      <path class="mark" data-dps="ar2" d="M320 266 L 344 266" stroke="#6b7076" stroke-width="1.5" fill="none" marker-end="url(#dps1-asg)"></path>
+      <g class="mark" data-dps="pa0" fill="#BA6C31"><rect x="326" y="131" width="4" height="14" rx="1"></rect><rect x="334" y="131" width="4" height="14" rx="1"></rect></g>
+      <g class="mark" data-dps="pa1" fill="#BA6C31"><rect x="326" y="195" width="4" height="14" rx="1"></rect><rect x="334" y="195" width="4" height="14" rx="1"></rect></g>
+      <g class="mark" data-dps="pa2" fill="#BA6C31"><rect x="326" y="259" width="4" height="14" rx="1"></rect><rect x="334" y="259" width="4" height="14" rx="1"></rect></g>
+
+    </g>
+
+    <!-- blue db -->
+    <g>
+      <rect class="box box-blue" x="600" y="56" width="200" height="92" rx="10"></rect>
+      <text class="t-title db-blue-title" x="700" y="88" text-anchor="middle" fill="#2563eb">Blue DB</text>
+      <g class="pill" data-dps="pblue">
+        <rect x="622" y="102" width="156" height="24" rx="12"></rect>
+        <text class="t-tag" x="700" y="118" text-anchor="middle" data-dps="pbluet"></text>
+      </g>
+      <text class="t-sub" x="700" y="168" text-anchor="middle" data-dps="cblue"></text>
+    </g>
+
+    <!-- replication -->
+    <g class="g-repl">
+      <path class="repl-line" d="M700 186 L 700 242" fill="none" stroke="#2B8728" stroke-width="2" marker-end="url(#dps1-arw)"></path>
+      <text class="t-tag" x="714" y="216" fill="#2B8728" data-dps="repl">replication</text>
+    </g>
+
+    <!-- green db -->
+    <g class="g-green">
+      <rect class="box box-green" x="600" y="250" width="200" height="92" rx="10"></rect>
+      <text class="t-title" x="700" y="282" text-anchor="middle" fill="#2B8728">Green DB</text>
+      <g class="pill" data-dps="pgreen">
+        <rect x="622" y="296" width="156" height="24" rx="12"></rect>
+        <text class="t-tag" x="700" y="312" text-anchor="middle" data-dps="pgreent"></text>
+      </g>
+      <text class="t-sub" x="700" y="362" text-anchor="middle" data-dps="cgreen"></text>
+    </g>
+  </svg>
+
+  <div class="dps-meter">
+    <span class="dps-meter-label">요청 latency</span>
+    <div class="dps-bar"><div class="dps-bar-fill" data-dps="bar"></div></div>
+    <span class="dps-meter-val" data-dps="lat"></span>
+  </div>
+
+  <p class="dps-desc" data-dps="desc"></p>
+
+  <div class="dps-ctrl">
+    <button type="button" data-dps="prev" aria-label="이전 단계">◀</button>
+    <div class="dps-dots" data-dps="dots"></div>
+    <button type="button" data-dps="next" aria-label="다음 단계">▶</button>
+    <button type="button" class="dps-play" data-dps="play">▶ 자동 재생</button>
+  </div>
+</div>
+<figcaption>DB Proxy 를 사용한 무중단 Switchover 과정</figcaption>
+</figure>
+
+<script>
+(function () {
+  var root = document.getElementById('dps1');
+  if (!root) return;
+
+  var TONE = { run: '#2563eb', hold: '#BA6C31', idle: '#9aa0a6', recv: '#2B8728' };
+
+  // row: [앞단 상태, 상태종류, 뒷단 DB(null=없음), 뒷단 상태]
+  function R(f, k, db, b) { return { f: f, k: k, db: db, b: b }; }
+
+  var STEPS = [
+    { rows: [R('transaction 진행중', 'run', 'blue', '사용중'), R('query 실행중', 'run', 'blue', '사용중'), R('idle', 'idle', null, '반납됨')],
+      blue: ['사용중', 'on', 2], green: null, lat: [2, '~5ms'],
+      title: '시작',
+      desc: 'DB Proxy 는 <b>앞단 연결</b>(클라이언트 ↔ Proxy)과 <b>뒷단 연결</b>(Proxy ↔ DB)을 따로 관리합니다. 앞단 연결은 계속 살아 있고, 뒷단 연결은 query 를 처리할 때만 배정됩니다.' },
+
+    { rows: [R('transaction 진행중', 'run', 'blue', '사용중'), R('query 실행중', 'run', 'blue', '사용중'), R('idle', 'idle', null, '반납됨')],
+      blue: ['사용중', 'on', 2], green: ['read_only (복제중)', 'pill', 0], flags: ['green', 'repl'], lat: [2, '~5ms'],
+      title: '1. Green DB 생성',
+      desc: '새 버전의 Green DB 를 만들고, Blue DB 로부터 replication 을 걸어 변경사항을 따라가게 합니다. 아직 Proxy 는 Green DB 를 쓰지 않습니다.' },
+
+    { rows: [R('transaction 진행중', 'run', 'blue', '사용중'), R('query 실행중', 'run', 'blue', '사용중'), R('idle', 'idle', null, '반납됨')],
+      blue: ['사용중', 'on', 2], green: ['read_only 테스트중', 'go', 0], flags: ['green', 'repl'], lat: [2, '~5ms'],
+      title: '2. Green DB 테스트',
+      desc: '운영 트래픽은 그대로 Blue DB 로 가는 동안, read_only 상태의 Green DB 로 여러가지 테스트를 합니다.' },
+
+    { rows: [R('transaction 진행중', 'run', 'blue', '사용중'), R('query 실행중', 'run', 'blue', '사용중'), R('idle', 'idle', null, '반납됨')],
+      blue: ['draining (신규 연결 차단)', 'warn', 2], green: ['read_only', 'pill', 0], flags: ['green', 'repl'], lat: [2, '~5ms'],
+      title: '3-1. draining 시작',
+      desc: 'Blue DB 를 draining 상태로 바꿉니다. <b>이미 만들어진 뒷단 연결은 그대로 쓰지만, 새 뒷단 연결은 더이상 만들지 않습니다.</b> 지금은 아직 아무것도 느려지지 않습니다.' },
+
+    { rows: [R('transaction 진행중', 'run', 'blue', '사용중'), R('query 실행중', 'run', 'blue', '사용중'), R('query 보류중', 'hold', null, '배정 대기')],
+      blue: ['draining (신규 연결 차단)', 'warn', 2], green: ['read_only', 'pill', 0], flags: ['green', 'repl'], warn: true, lat: [25, '~0.5초'],
+      title: '3-2. 첫 query 보류',
+      desc: '서버 3 이 새 query 를 보냈습니다. 배정할 뒷단 연결이 없고 새로 만들 수도 없기 때문에, Proxy 가 이 query 를 들고 기다립니다. <b>앞단 연결은 그대로 살아 있어서, 서버는 query 가 느린 것으로만 느낍니다.</b>' },
+
+    { rows: [R('transaction 진행중', 'run', 'blue', '사용중'), R('query 보류중', 'hold', null, '배정 대기'), R('query 보류중', 'hold', null, '배정 대기')],
+      blue: ['draining (신규 연결 차단)', 'warn', 1], green: ['read_only', 'pill', 0], flags: ['green', 'repl'], warn: true, lat: [50, '~1.0초'],
+      title: '3-3. 뒷단 연결 반납',
+      desc: '서버 2 의 query 가 끝나서 뒷단 연결이 반납되었고, 새로 만들지 않기 때문에 그대로 사라집니다. Blue DB 의 연결이 2개에서 1개로 줄었습니다.' },
+
+    { rows: [R('query 보류중', 'hold', null, '배정 대기'), R('query 보류중', 'hold', null, '배정 대기'), R('query 보류중', 'hold', null, '배정 대기')],
+      blue: ['draining 완료', 'warn', 0], green: ['read_only', 'pill', 0], flags: ['green', 'repl'], warn: true, lat: [68, '~1.4초'],
+      title: '3-4. draining 완료',
+      desc: '서버 1 의 transaction 까지 끝나면서 Blue DB 의 뒷단 연결이 0개가 되었습니다. 이 시점부터 Blue DB 에는 더이상 변경이 생기지 않습니다. 모든 query 는 Proxy 안에서 보류중입니다.' },
+
+    { rows: [R('query 보류중', 'hold', null, '배정 대기'), R('query 보류중', 'hold', null, '배정 대기'), R('query 보류중', 'hold', null, '배정 대기')],
+      blue: ['연결 0개', 'off', 0], green: ['따라잡는 중', 'go', 0], flags: ['green', 'catchup'], warn: true, lat: [85, '~1.8초'], repl: '마지막 변경사항 따라잡는 중',
+      title: '3-5. 복제 대기',
+      desc: 'Green DB 가 Blue DB 의 마지막 변경사항까지 모두 반영했는지 확인합니다. 두 DB 의 복제 위치가 같아질 때까지 기다립니다.' },
+
+    { rows: [R('응답 받는 중', 'recv', 'green', '새로 배정'), R('응답 받는 중', 'recv', 'green', '새로 배정'), R('응답 받는 중', 'recv', 'green', '새로 배정')],
+      blue: ['사용 안함', 'off', 0], green: ['사용중', 'go', 3], flags: ['green', 'blueoff'], warn: true, lat: [95, '~2.0초'],
+      title: '3-6. Green DB 로 전환',
+      desc: 'Proxy 가 뒷단을 Green DB 로 바꿉니다. 보류하고 있던 query 들에 <b>Green DB 로의 뒷단 연결을 새로 배정해서</b> 그대로 전달합니다. 앞단 연결은 한번도 끊기지 않았습니다.' },
+
+    { rows: [R('transaction 진행중', 'run', 'green', '사용중'), R('query 실행중', 'run', 'green', '사용중'), R('idle', 'idle', null, '반납됨')],
+      blue: ['사용 안함', 'off', 0], green: ['사용중', 'go', 2], flags: ['green', 'blueoff'], lat: [2, '~5ms'],
+      title: '완료',
+      desc: '응답이 클라이언트로 정상적으로 돌아갔습니다. 서버 입장에서는 query 가 2초 정도 느려진 것뿐이고, 실패한 요청도, 끊어진 연결도 없습니다.' }
+  ];
+
+  var ALL = ['green', 'repl', 'catchup', 'blueoff'];
+  var el = {};
+  var keys = ['stepno', 'status', 'desc', 'repl', 'bar', 'lat', 'prev', 'next', 'play', 'dots',
+              'pblue', 'pbluet', 'cblue', 'pgreen', 'pgreent', 'cgreen'];
+  [0, 1, 2].forEach(function (i) {
+    keys.push('f' + i, 'bx' + i, 'bd' + i, 'bs' + i, 'ar' + i, 'pa' + i, 'cl' + i,
+              'bl' + i + '-blue', 'bl' + i + '-green');
+  });
+  keys.forEach(function (k) { el[k] = root.querySelector('[data-dps="' + k + '"]'); });
+
+  var dots = STEPS.map(function (s, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = String(i + 1);
+    b.setAttribute('aria-label', (i + 1) + '단계: ' + s.title);
+    b.addEventListener('click', function () { stop(); render(i); });
+    el.dots.appendChild(b);
+    return b;
+  });
+
+  var cur = 0;
+  var timer = null;
+
+  function pill(g, t, text, kind) {
+    g.setAttribute('class', 'pill' + (kind && kind !== 'pill' ? ' ' + kind : ''));
+    g.style.opacity = text ? '1' : '0';
+    t.textContent = text;
+  }
+
+  function render(i) {
+    cur = (i + STEPS.length) % STEPS.length;
+    var s = STEPS[cur];
+
+    ALL.forEach(function (f) { root.classList.remove('f-' + f); });
+    (s.flags || []).forEach(function (f) { root.classList.add('f-' + f); });
+    root.classList.toggle('is-warn', !!s.warn);
+
+    s.rows.forEach(function (r, n) {
+      el['f' + n].textContent = r.f;
+      el['f' + n].setAttribute('fill', TONE[r.k]);
+
+      el['bd' + n].textContent = r.db === 'blue' ? 'Blue DB' : (r.db === 'green' ? 'Green DB' : '—');
+      el['bd' + n].setAttribute('fill', r.db === 'blue' ? '#2563eb' : (r.db === 'green' ? '#2B8728' : '#9aa0a6'));
+      el['bs' + n].textContent = r.b;
+      el['bs' + n].setAttribute('fill', r.k === 'hold' ? '#BA6C31' : '#6b7076');
+
+      el['bx' + n].setAttribute('class', 'box box-slot' + (r.db ? '' : (r.k === 'hold' ? ' wait' : ' empty')));
+
+      el['ar' + n].style.opacity = r.db ? '1' : '0';
+      el['pa' + n].style.opacity = r.k === 'hold' ? '1' : '0';
+
+      el['cl' + n].setAttribute('class', 'link ' + r.k);
+      el['bl' + n + '-blue'].setAttribute('class', 'link link-back blue' + (r.db === 'blue' ? ' show ' + r.k : ''));
+      el['bl' + n + '-green'].setAttribute('class', 'link link-back green' + (r.db === 'green' ? ' show ' + r.k : ''));
+    });
+
+    pill(el.pblue, el.pbluet, s.blue[0], s.blue[1]);
+    el.cblue.textContent = '뒷단 연결 ' + s.blue[2] + '개';
+    el.cblue.setAttribute('fill', s.blue[2] === 0 ? '#9aa0a6' : '#6b7076');
+    if (s.green) {
+      pill(el.pgreen, el.pgreent, s.green[0], s.green[1]);
+      el.cgreen.textContent = '뒷단 연결 ' + s.green[2] + '개';
+    } else {
+      pill(el.pgreen, el.pgreent, '', 'pill');
+      el.cgreen.textContent = '';
+    }
+
+    el.bar.style.width = s.lat[0] + '%';
+    el.lat.textContent = s.lat[1];
+
+    el.stepno.textContent = 'STEP ' + (cur + 1) + ' / ' + STEPS.length;
+    el.status.textContent = s.warn ? '서비스 정상 (latency 증가)' : '서비스 정상';
+    el.desc.innerHTML = '<b>' + s.title + '</b> — ' + s.desc;
+    el.repl.textContent = s.repl || 'replication';
+
+    dots.forEach(function (b, n) { b.setAttribute('aria-current', n === cur ? 'true' : 'false'); });
+    el.prev.disabled = cur === 0;
+    el.next.disabled = cur === STEPS.length - 1;
+  }
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    el.play.textContent = '▶ 자동 재생';
+  }
+
+  el.prev.addEventListener('click', function () { stop(); render(cur - 1); });
+  el.next.addEventListener('click', function () { stop(); render(cur + 1); });
+  el.play.addEventListener('click', function () {
+    if (timer) { stop(); return; }
+    if (cur === STEPS.length - 1) render(0);
+    el.play.textContent = '❚❚ 정지';
+    timer = setInterval(function () {
+      if (cur === STEPS.length - 1) { stop(); return; }
+      render(cur + 1);
+    }, 2600);
+  });
+
+  render(0);
+})();
+</script>

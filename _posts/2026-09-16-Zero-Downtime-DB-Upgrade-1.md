@@ -23,7 +23,7 @@ AWS Managed DB 를 사용하다보면, AWS 에서 DB 버전 업그레이드를 �
    2. 새로운 DB 가 이전 DB 의 변경사항을 모두 따라잡을때까지 기다립니다.
    3. DB 연결에 사용되던 endpoint 의 DNS record 들을 변경하여 새로운 DB 를 가르키도록 만듭니다.
 
-<< 여기에 visualization 넣기 >>
+{% include viz/rds-blue-green.html %}
 
 이 방법을 쓰면 다운 타임을 최소화는 되겠지만, 일반적인 서버 프로그램에서는 다운타임을 없애긴 쉽지 않습니다. 그 이유는 총 2가지입니다.
 
@@ -49,7 +49,7 @@ AWS RDS Blue-Green Deployment 에 있는 문제들을 해결해야만 무중단 
       1. DB Proxy 가 뒷단 DB 에 전달을 안해주고 있던 query 를 새로운 DB 에 이제서야 전달해줍니다.
       2. 새로운 DB 에서 응답이 온것을 Client 에 전달을 정상적으로 해주기 때문에, Client 입장에서 단순히 query 가 느려진 것처럼 느껴집니다.
 
-<< 여기에 visualization 넣기 >>
+{% include viz/db-proxy-switchover.html %}
 
 이렇게 업그레이드를 하게 되면, draining 되는데 시간이 2초 걸렸다고 했을 때, 그때의 서버의 모든 요청의 latency 가 2초로 증가하긴 하지만 서버의 응답은 정상적으로 나올것이기에 다운타임이 생기진 않게 됩니다. 이런 무중단 업그레이드를 하기 위해서는 약간의 서버에 대한 가정들이 필요합니다.
 
