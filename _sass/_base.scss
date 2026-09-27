@@ -172,28 +172,46 @@ blockquote {
 
 /**
  * Code formatting
+ *
+ * 값은 GitHub 의 markdown body 를 따른다.
+ * https://github.com/sindresorhus/github-markdown-css
  */
 pre,
 code {
-    font-size: 15px;
-    border: 1px solid $grey-color-light;
-    border-radius: 3px;
-    background-color: #f6f8fa;
+    font-family: $mono-font-family;
+    letter-spacing: normal;
 }
 
 code {
-    padding: 1px 5px;
+    padding: 0.2em 0.4em;
+    font-size: 85%;
+    white-space: break-spaces;
+    background-color: rgba(129, 139, 152, 0.12);
+    border-radius: 6px;
 }
 
 pre {
-    padding: 8px 12px;
+    padding: 16px;
     overflow-x: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f6f8fa;
+    border-radius: 6px;
 
     > code {
-        border: 0;
-        padding-right: 0;
-        padding-left: 0;
+        padding: 0;
+        font-size: 100%;
+        white-space: pre;
+        word-break: normal;
+        background-color: transparent;
+        border-radius: 0;
     }
+}
+
+// rouge 테마가 감싸는 div 에도 배경을 준다.
+// 그대로 두면 둥근 pre 뒤로 사각 배경이 비친다.
+div.highlight {
+    background-color: transparent;
 }
 
 
