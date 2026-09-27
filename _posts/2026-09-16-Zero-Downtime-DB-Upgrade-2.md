@@ -90,7 +90,7 @@ SELECT NOW(); -- ProxySQL 이 없었다면, 해당 연결의 timezone 이 +09:00
               -- 하지만 연결 C 로 간다면 DB 기본 timezone 인 UTC 로 나오게 된다.
 ```
 
-<< 이것도 visualization >>
+{% include viz/multiplexing.html %}
 
 이러한 문제를 방지하기 위해서, ProxySQL 은 session variable 을 사용만 하더라도(SELECT 만 하더라도) 해당 앞단 연결에 대해서는 Multiplexing 을 꺼버립니다. 그렇게 되면 해당 앞단 연결에 대해서는 하나의 뒷단 연결을 독점으로 배정해주게 됩니다. 이 외에도 Multiplexing 이 disable 되는 조건들이 있기에 개발환경에서 ProxySQL 의 앞단 연결들이 Multiplexing 이 disable 되었는지, 되었다면 왜 되었는지 알아내고 그것들을 해결을 해줘야 됩니다. 이는 ProxySQL 의 설정과 stats 테이블을 통해 알아낼 수 있습니다.
 
