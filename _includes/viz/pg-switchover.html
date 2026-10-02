@@ -1,0 +1,192 @@
+{% include viz/stepper.html %}
+<figure>
+<div class="vz vz-lg" id="pso1">
+  <div class="vz-head">
+    <span class="vz-stepno" data-vz="stepno"></span>
+    <div class="vz-seg" data-vz="seg" role="group" aria-label="Switchover 결과"></div>
+    <span class="vz-status" data-vz="status"></span>
+  </div>
+
+  <svg viewBox="0 0 730 346" role="img" aria-label="PgBouncer 를 사용한 PostgreSQL Switchover 과정">
+    <defs>
+      <marker id="pso1-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#2B8728"></path>
+      </marker>
+    </defs>
+
+    <!-- links -->
+    <path class="link" data-k="a0" d="M108 110 L 140 110"></path>
+    <path class="link" data-k="a1" d="M108 170 L 140 170"></path>
+    <path class="link" data-k="a2" d="M108 230 L 140 230"></path>
+    <path class="link" data-k="po" d="M430 120 C 452 120, 450 100, 470 100"></path>
+    <path class="link" data-k="pn" d="M430 230 C 452 230, 450 282, 470 282"></path>
+
+    <!-- app servers -->
+    <rect class="box" x="8" y="90" width="100" height="40" rx="8"></rect>
+    <rect class="box" x="8" y="150" width="100" height="40" rx="8"></rect>
+    <rect class="box" x="8" y="210" width="100" height="40" rx="8"></rect>
+    <text class="t-sub" x="58" y="115" text-anchor="middle">App 서버 1</text>
+    <text class="t-sub" x="58" y="175" text-anchor="middle">App 서버 2</text>
+    <text class="t-sub" x="58" y="235" text-anchor="middle">App 서버 3</text>
+    <text class="t-note" x="58" y="278" text-anchor="middle" data-k="ast1"></text>
+    <text class="t-note" x="58" y="296" text-anchor="middle" data-k="ast2"></text>
+
+    <!-- pgbouncer -->
+    <rect class="box box-proxy" x="140" y="30" width="290" height="306" rx="10"></rect>
+    <text class="t-title" x="285" y="60" text-anchor="middle">PgBouncer</text>
+    <text class="t-sub" x="156" y="101">pgbouncer.ini →</text>
+    <g class="pill" data-k="pini">
+      <rect x="272" y="83" width="146" height="26" rx="13"></rect>
+      <text class="t-tag" x="345" y="101" text-anchor="middle" data-k="pinit">blue.pgbouncer.ini</text>
+    </g>
+    <text class="t-sub" x="156" y="141">DB 상태</text>
+    <g class="pill" data-k="pst">
+      <rect x="272" y="123" width="146" height="26" rx="13"></rect>
+      <text class="t-tag" x="345" y="141" text-anchor="middle" data-k="pstt">RUNNING</text>
+    </g>
+    <line x1="156" y1="168" x2="418" y2="168" stroke="#e7e9eb" stroke-width="1"></line>
+    <text class="t-sub" x="156" y="196">이전 DB 로의 뒷단 연결</text>
+    <text class="t-tag" x="418" y="196" text-anchor="end" data-k="conn">2개</text>
+    <text class="t-sub" x="156" y="224">보류중인 query</text>
+    <text class="t-tag" x="418" y="224" text-anchor="end" data-k="hold">0개</text>
+    <text class="t-hdr" x="156" y="264">admin console</text>
+    <text class="t-mono" x="156" y="288" data-k="cmd"></text>
+    <text class="t-note" x="285" y="320" text-anchor="middle" data-k="pnote"></text>
+
+    <!-- old db -->
+    <rect class="box box-blue" data-k="bold" x="470" y="30" width="252" height="146" rx="10"></rect>
+    <text class="t-title" x="596" y="58" text-anchor="middle" style="fill:#2563eb">이전 DB</text>
+    <text class="t-mono" x="486" y="88">pg_stat_activity</text>
+    <text class="t-tag" x="706" y="88" text-anchor="end" data-k="oact">app 2개</text>
+    <text class="t-mono" x="486" y="114">slot lag</text>
+    <text class="t-tag" x="706" y="114" text-anchor="end" data-k="olag">2,048 bytes</text>
+    <text class="t-mono" x="486" y="140">switchover_marker</text>
+    <text class="t-tag" x="706" y="140" text-anchor="end" data-k="omark">-</text>
+    <text class="t-mono" x="486" y="164">payment_id_seq</text>
+    <text class="t-tag" x="706" y="164" text-anchor="end">1042</text>
+
+    <!-- replication -->
+    <path class="link recv" data-k="repl" d="M596 182 L 596 226" marker-end="url(#pso1-arw)"></path>
+    <text class="t-tag" x="608" y="210" style="fill:#2B8728">logical replication</text>
+
+    <!-- new db -->
+    <rect class="box box-green" x="470" y="232" width="252" height="104" rx="10"></rect>
+    <text class="t-title" x="596" y="260" text-anchor="middle" style="fill:#2B8728">새 DB</text>
+    <text class="t-mono" x="486" y="290">switchover_marker</text>
+    <text class="t-tag" x="706" y="290" text-anchor="end" data-k="nmark">-</text>
+    <text class="t-mono" x="486" y="316">payment_id_seq</text>
+    <text class="t-tag" x="706" y="316" text-anchor="end" data-k="nseq">1</text>
+  </svg>
+
+  <div class="vz-checks">
+    <span class="vz-checks-label">확인 조건</span>
+    <span class="vz-check" data-k="k0">pg_stat_activity 에 app 연결 없음</span>
+    <span class="vz-check" data-k="k1">slot lag 0 bytes</span>
+    <span class="vz-check" data-k="k2">marker row 가 새 DB 에 있음</span>
+  </div>
+
+  <div class="vz-meter">
+    <span class="vz-meter-label">경과 시간 / 타임아웃</span>
+    <div class="vz-bar"><div class="vz-bar-fill" data-vz="bar"></div></div>
+    <span class="vz-meter-val" data-vz="barval"></span>
+  </div>
+
+  <p class="vz-desc" data-vz="desc"></p>
+
+  <div class="vz-ctrl">
+    <button type="button" data-vz="prev" aria-label="이전 단계">◀</button>
+    <div class="vz-dots" data-vz="dots"></div>
+    <button type="button" data-vz="next" aria-label="다음 단계">▶</button>
+    <button type="button" class="vz-play" data-vz="play">▶ 자동 재생</button>
+  </div>
+</div>
+<figcaption>PgBouncer 를 사용한 PostgreSQL Switchover 과정 (숫자는 예시)</figcaption>
+</figure>
+
+<script>
+(function () {
+  var GREEN = '#2B8728';
+  var RED = '#BA313B';
+  var HOLD = '#BA6C31';
+  var KEEP = { ast1: { t: '앞단 연결은', f: GREEN }, ast2: { t: '끊기지 않음', f: GREEN } };
+  function W(o) { o.tone = 'warn'; o.status = '서비스 정상 (latency 증가)'; return o; }
+  function M(a, b) { var o = {}; [a, b].forEach(function (x) { Object.keys(x).forEach(function (k) { o[k] = x[k]; }); }); return o; }
+
+  var start = {
+    title: '시작',
+    meter: [0, '0.0초'],
+    desc: 'App 서버들은 PgBouncer 를 통해 이전 DB 를 사용합니다. <code>pgbouncer.ini</code> 는 이전 DB 를 바라보는 <code>blue.pgbouncer.ini</code> 의 symlink 입니다. 새 DB 는 logical replication 으로 이전 DB 를 따라가고 있습니다.'
+  };
+  var pause = W({
+    title: '1. draining — PAUSE',
+    set: { pst: 'warn', pstt: { t: 'PAUSE 진행중' }, cmd: { t: 'PAUSE <db>;' }, a2: 'hold', hold: { t: '1개', f: HOLD },
+           k0: 'no', k1: 'no', k2: 'no', pnote: { t: '진행중인 transaction 이 끝나길 기다림' } },
+    meter: [10, '0.5초'],
+    desc: 'PgBouncer 에서 <code>PAUSE</code> 를 실행합니다. 진행중인 transaction 은 끝날 때까지 기다리고, 새 transaction 은 PgBouncer 안에서 <b>보류</b>됩니다.'
+  });
+  var paused = W({
+    title: '1. draining — PAUSE 완료',
+    set: { pst: 'warn', pstt: { t: 'PAUSED' }, a0: 'hold', a1: 'hold', po: 'hide', conn: { t: '0개', f: GREEN },
+           hold: { t: '3개', f: HOLD }, oact: { t: '✓ app 없음', f: GREEN }, k0: 'ok', bold: 'box-off',
+           olag: { t: '512 bytes' }, pnote: { t: '모든 query 를 보류중' } },
+    meter: [22, '1.1초'],
+    desc: '진행중인 transaction 이 모두 끝나서 PAUSE 가 완료되었습니다. 이전 DB 의 <code>pg_stat_activity</code> 에도 서버 어플리케이션의 연결이 없는 것을 확인합니다.'
+  });
+  var marker = W({
+    title: '2. marker row 추가',
+    set: { omark: { t: '+ 1 row', f: '#2563eb' }, olag: { t: '640 bytes' }, repl: 'fast', cmd: { t: '' }, pnote: { t: '' } },
+    meter: [26, '1.3초'],
+    desc: 'PostgreSQL 에서는 새 DB 가 WAL 을 어디까지 <b>실행</b>했는지 볼 수 없기 때문에, 이전 DB 의 <code>switchover_marker</code> table 에 row 를 하나 추가합니다. 이 row 가 새 DB 에 보이면 그 전의 변경도 모두 반영된 것입니다.'
+  });
+  var caught = W({
+    title: '3. polling — 복제 완료',
+    set: { olag: { t: '✓ 0 bytes', f: GREEN }, nmark: { t: '✓ 1 row', f: GREEN }, repl: '', k1: 'ok', k2: 'ok' },
+    meter: [32, '1.6초'],
+    desc: 'replication slot 의 lag 가 0 이 되었고, marker row 도 새 DB 에서 보입니다. 이전 DB 의 변경사항이 모두 새 DB 에 반영되었습니다.'
+  });
+  var seq = W({
+    title: '4. 새 DB 사용 — sequence 반영',
+    set: { nseq: { t: '✓ 1042', f: GREEN }, cmd: { t: 'SELECT setval(…);' } },
+    meter: [34, '1.7초'],
+    desc: 'logical replication 은 sequence 를 복제하지 않기 때문에, 이전 DB 의 sequence 값들을 새 DB 에 <code>setval</code> 로 넣어줍니다.'
+  });
+  var swap = W({
+    title: '4. 새 DB 사용 — 설정 교체',
+    set: { pini: 'go', pinit: { t: 'green.pgbouncer.ini' }, cmd: { t: 'RELOAD;' }, pnote: { t: 'symlink 교체 후 RELOAD' } },
+    meter: [36, '1.8초'],
+    desc: '<code>pgbouncer.ini</code> symlink 를 <code>green.pgbouncer.ini</code> 로 바꾸고 <code>RELOAD</code> 합니다. 이제 PgBouncer 는 새 DB 를 바라보지만, 아직 PAUSE 상태라 query 는 보류중입니다.'
+  });
+  var resume = {
+    title: '4. 새 DB 사용 — RESUME',
+    set: M({ pst: 'go', pstt: { t: 'RUNNING' }, cmd: { t: 'RESUME <db>;' }, a0: 'recv', a1: 'recv', a2: 'recv', pn: 'recv',
+             hold: { t: '0개', f: GREEN }, pnote: { t: '보류한 query 를 새 DB 로 전달' } }, KEEP),
+    tone: 'ok', status: '서비스 정상', meter: [38, '1.9초'],
+    desc: '<code>RESUME</code> 으로 보류하던 query 들을 <b>새 DB 로</b> 보냅니다. 서버 입장에서는 query 가 2초 정도 느려진 것뿐입니다.'
+  };
+
+  var stuck = {
+    title: '1. draining — 타임아웃',
+    set: { conn: { t: '1개', f: RED }, a1: 'hold', hold: { t: '2개', f: HOLD },
+           oact: { t: '✗ idle in tx 1개', f: RED }, pnote: { t: 'transaction 이 끝나지 않음' } },
+    tone: 'bad', status: '타임아웃', meter: [100, '타임아웃'],
+    desc: '<code>idle in transaction</code> 상태로 오래 남아 있는 session 때문에, 타임아웃 안에 PAUSE 가 끝나지 않았습니다.'
+  };
+  var rollback = {
+    title: '5. 롤백',
+    set: M({ pst: 'on', pstt: { t: 'RUNNING' }, cmd: { t: 'RESUME <db>;' }, a1: 'run', a2: 'run', po: 'run',
+             hold: { t: '0개', f: GREEN }, pnote: { t: '보류한 query 를 이전 DB 로 전달' } }, KEEP),
+    tone: 'warn', status: '서비스 정상 (다시 시도)', meter: [100, '타임아웃'],
+    desc: 'PgBouncer 설정을 이전 DB 로 둔 채로 <code>RESUME</code> 합니다. (설정을 이미 바꿨다면 먼저 되돌리고 <code>RELOAD</code> 합니다.) 보류한 query 들은 <b>이전 DB 로</b> 가고, 다음에 다시 시도하면 됩니다.'
+  };
+
+  vzStepper({
+    id: 'pso1',
+    base: { a0: 'run', a1: 'run', a2: 'run', po: 'run', pn: 'hide', pini: 'on', pst: 'on',
+            oact: { f: '#444' }, olag: { f: '#444' }, omark: { f: '#9aa0a6' }, nmark: { f: '#9aa0a6' }, nseq: { f: '#444' } },
+    modes: {
+      ok: { label: '성공', steps: [start, pause, paused, marker, caught, seq, swap, resume] },
+      timeout: { label: '타임아웃 → 롤백', steps: [start, pause, stuck, rollback] }
+    }
+  });
+})();
+</script>

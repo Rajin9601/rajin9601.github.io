@@ -1,0 +1,265 @@
+<style>
+.vz {
+  --vz-blue: #2563eb;
+  --vz-green: #2B8728;
+  --vz-red: #BA313B;
+  --vz-amber: #BA6C31;
+  --vz-grey: #9aa0a6;
+  --vz-line: #d7dade;
+  border: 1px solid var(--vz-line);
+  border-radius: 10px;
+  padding: 14px 16px 12px;
+  background: #fff;
+  letter-spacing: 0;
+  text-align: left;
+}
+.vz-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; font-size: 12px; margin-bottom: 8px; flex-wrap: wrap;
+}
+.vz-stepno { color: var(--vz-grey); font-weight: 500; }
+.vz-status {
+  font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  border: 1px solid currentColor; white-space: nowrap; color: var(--vz-green);
+}
+.vz.tone-warn .vz-status { color: var(--vz-amber); background: #fdf2e9; }
+.vz.tone-bad .vz-status { color: var(--vz-red); background: #fdeeef; }
+.vz.tone-ok .vz-status { color: var(--vz-green); background: #eef6ed; }
+
+.vz-seg { display: flex; border: 1px solid var(--vz-line); border-radius: 8px; overflow: hidden; }
+.vz-seg button {
+  font: inherit; font-size: 12.5px; line-height: 1; font-weight: 500;
+  border: 0; background: #fff; color: #6b7076; padding: 8px 12px; cursor: pointer; white-space: nowrap;
+}
+.vz-seg button + button { border-left: 1px solid var(--vz-line); }
+.vz-seg button:hover { background: #f7f8f9; }
+.vz-seg button[aria-pressed="true"] { background: #111; color: #fff; }
+
+.vz svg { display: block; width: 100%; height: auto; }
+.vz text { font-family: inherit; fill: #111; transition: fill .3s; }
+.vz .t-title { font-size: 15px; font-weight: 600; }
+.vz .t-sub { font-size: 12px; fill: #6b7076; }
+.vz .t-hdr { font-size: 11.5px; font-weight: 600; fill: #9aa0a6; letter-spacing: .3px; }
+.vz .t-tag { font-size: 12px; font-weight: 600; }
+.vz .t-note { font-size: 11.5px; fill: #8b9097; }
+.vz .t-mono { font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #444; }
+
+/* 가로폭이 좁은 viewBox 를 쓰는 viz 용 큰 글씨 */
+.vz-lg .t-title { font-size: 17px; }
+.vz-lg .t-sub, .vz-lg .t-tag { font-size: 13.5px; }
+.vz-lg .t-mono { font-size: 13px; }
+.vz-lg .t-note, .vz-lg .t-hdr { font-size: 12.5px; }
+.vz-lg .pill text { font-size: 12.5px; }
+
+.vz .box { fill: #fff; stroke: var(--vz-line); stroke-width: 1.5px; transition: stroke .3s, fill .3s, opacity .3s; }
+.vz .box-proxy { fill: #fbfbfc; stroke: #8b9097; }
+.vz .box-blue { fill: #eff4fe; stroke: var(--vz-blue); }
+.vz .box-green { fill: #eef6ed; stroke: var(--vz-green); }
+.vz .box-amber { fill: #fdf7f1; stroke: var(--vz-amber); }
+.vz .box-off { fill: #f4f5f6; stroke: var(--vz-line); }
+.vz .box-dash { stroke-dasharray: 4 4; fill: #fafbfb; }
+.vz .box-wait { stroke-dasharray: 4 4; stroke: var(--vz-amber); fill: #fdf7f1; }
+.vz .box-on { stroke: var(--vz-blue); fill: #eff4fe; }
+.vz .box-own { stroke: var(--vz-green); fill: #eef6ed; }
+
+.vz .link { fill: none; stroke: var(--vz-line); stroke-width: 2px; transition: opacity .3s, stroke .3s; }
+.vz .link.run { stroke: var(--vz-blue); stroke-dasharray: 7 6; animation: vz-flow .9s linear infinite; }
+.vz .link.recv { stroke: var(--vz-green); stroke-dasharray: 7 6; animation: vz-flow .9s linear infinite; }
+.vz .link.hold { stroke: var(--vz-amber); stroke-dasharray: 2 8; animation: vz-flow 2.4s linear infinite; }
+.vz .link.warn { stroke: var(--vz-amber); stroke-dasharray: 7 6; animation: vz-flow .9s linear infinite; }
+.vz .link.fast { stroke-width: 3px; animation-duration: .5s; }
+.vz .link.off { stroke: #c9ced3; stroke-dasharray: 3 6; }
+.vz .link.hide { opacity: 0; }
+@keyframes vz-flow { from { stroke-dashoffset: 26; } to { stroke-dashoffset: 0; } }
+
+.vz .fade { transition: opacity .35s; }
+.vz .hide { opacity: 0; }
+.vz .dim { opacity: .3; }
+
+.vz .pill rect { fill: #fff; stroke: var(--vz-grey); stroke-width: 1px; transition: fill .3s, stroke .3s; }
+.vz .pill text { fill: #6b7076; }
+.vz .pill.on rect { fill: #eff4fe; stroke: var(--vz-blue); }
+.vz .pill.on text { fill: #2563eb; }
+.vz .pill.warn rect { fill: #fdf2e9; stroke: var(--vz-amber); }
+.vz .pill.warn text { fill: #8a4f22; }
+.vz .pill.go rect { fill: #eef6ed; stroke: var(--vz-green); }
+.vz .pill.go text { fill: #2B6E27; }
+.vz .pill.bad rect { fill: #fdeeef; stroke: var(--vz-red); }
+.vz .pill.bad text { fill: #9b2830; }
+.vz .pill.off rect { fill: #f4f5f6; stroke: var(--vz-line); }
+.vz .pill.off text { fill: #9aa0a6; }
+
+.vz-meter { display: flex; align-items: center; gap: 10px; font-size: 12px; margin-top: 10px; }
+.vz-meter-label { color: #6b7076; white-space: nowrap; }
+.vz-bar { position: relative; flex: 1; height: 8px; border-radius: 4px; background: #eef0f2; overflow: hidden; }
+.vz-bar-fill { height: 100%; width: 0; border-radius: 4px; background: var(--vz-green); transition: width .5s ease, background-color .35s; }
+.vz.tone-warn .vz-bar-fill { background: var(--vz-amber); }
+.vz.tone-bad .vz-bar-fill { background: var(--vz-red); }
+.vz-meter-val { font-variant-numeric: tabular-nums; color: #444; font-weight: 600; min-width: 4.2em; text-align: right; }
+
+.vz-checks { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 10px; font-size: 13px; }
+.vz-checks-label { color: #6b7076; margin-right: 2px; }
+.vz-check {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; line-height: 1.4;
+  border: 1px solid var(--vz-line); border-radius: 999px; color: #6b7076; background: #fff;
+  transition: color .3s, background-color .3s, border-color .3s;
+}
+.vz-check::before { content: '·'; font-weight: 700; }
+.vz-check.no { color: var(--vz-red); border-color: #f1c4c8; background: #fdeeef; }
+.vz-check.no::before { content: '✗'; }
+.vz-check.ok { color: #2B6E27; border-color: #bcd9ba; background: #eef6ed; font-weight: 600; }
+.vz-check.ok::before { content: '✓'; }
+
+.vz-desc { font-size: 14px; line-height: 1.6; text-align: left; margin: 10px 0 12px; min-height: 4.8em; }
+.vz-desc b { font-weight: 600; }
+.vz-desc code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px; background: #f3f4f5; padding: 1px 4px; border: 0; border-radius: 3px;
+}
+.vz-ctrl { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.vz-ctrl button {
+  font: inherit; font-size: 13px; line-height: 1;
+  border: 1px solid var(--vz-line); background: #fff; color: #444;
+  border-radius: 6px; padding: 7px 10px; cursor: pointer;
+}
+.vz-ctrl button:hover { border-color: #b4b8bd; background: #f7f8f9; }
+.vz-ctrl button[disabled] { opacity: .4; cursor: default; }
+.vz-dots { display: flex; gap: 4px; margin: 0 4px; flex-wrap: wrap; }
+.vz-dots button { padding: 6px 8px; color: #888; }
+.vz-dots button[aria-current="true"] { background: #111; border-color: #111; color: #fff; }
+.vz-play { margin-left: auto; }
+
+@media screen and (max-width: 600px) {
+  .vz { padding: 12px 10px 10px; }
+  .vz-desc { font-size: 13px; min-height: 6.4em; }
+  .vz-dots button { padding: 6px 6px; }
+  .vz-seg button { padding: 8px 9px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vz .link { animation: none !important; }
+}
+</style>
+
+<script>
+// 여러 viz 가 같은 page 에서 include 해도 한번만 정의한다.
+// cfg.modes: { key: { label, steps } } 또는 cfg.steps. cfg.status 는 step 에 status 가 없을 때 쓰는 값 ('' 이면 숨김).
+// step.set 은 앞 step 들의 set 위에 누적해서 적용된다.
+// set 값: 문자열이면 class 추가, 객체면 { c: class, t: text, h: html, f: fill, o: opacity, tr: transform }.
+// markup 에서 text 색을 정할 때도 fill attribute 가 아니라 style="fill:..." 를 쓴다.
+window.vzStepper = window.vzStepper || function (cfg) {
+  var root = document.getElementById(cfg.id);
+  if (!root) return;
+
+  var modes = cfg.modes || { only: { steps: cfg.steps } };
+  var modeKeys = Object.keys(modes);
+  var mode = modeKeys[0];
+  var cur = 0;
+  var timer = null;
+
+  function q(k) { return root.querySelector('[data-vz="' + k + '"]'); }
+  var ui = { stepno: q('stepno'), status: q('status'), desc: q('desc'), bar: q('bar'), barval: q('barval'),
+             prev: q('prev'), next: q('next'), play: q('play'), dots: q('dots'), seg: q('seg') };
+
+  var nodes = {};
+  root.querySelectorAll('[data-k]').forEach(function (n) {
+    nodes[n.getAttribute('data-k')] = n;
+    n.__base = n.getAttribute('class') || '';
+    n.__style = n.getAttribute('style');
+    n.__tr = n.getAttribute('transform');
+    // child element 가 있는 node (g 등) 는 text 를 건드리지 않는다
+    n.__text = n.children.length ? null : n.textContent;
+  });
+
+  function apply(key, v) {
+    var n = nodes[key];
+    if (!n) return;
+    if (typeof v === 'string') v = { c: v };
+    if (v.c !== undefined) n.setAttribute('class', (n.__base + ' ' + v.c).trim());
+    if (v.t !== undefined) n.textContent = v.t;
+    if (v.h !== undefined) n.innerHTML = v.h;
+    // CSS 의 fill 이 attribute 보다 우선이라 inline style 로 넣는다
+    if (v.f !== undefined) { if (n instanceof SVGElement) n.style.fill = v.f; else n.style.color = v.f; }
+    if (v.o !== undefined) n.style.opacity = String(v.o);
+    if (v.tr !== undefined) n.setAttribute('transform', v.tr);
+  }
+
+  if (ui.seg && modeKeys.length > 1) {
+    modeKeys.forEach(function (k) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = modes[k].label;
+      b.addEventListener('click', function () { stop(); mode = k; buildDots(); render(Math.min(cur, modes[k].steps.length - 1)); });
+      ui.seg.appendChild(b);
+      modes[k].btn = b;
+    });
+  }
+
+  var dots = [];
+  function buildDots() {
+    ui.dots.innerHTML = '';
+    dots = modes[mode].steps.map(function (s, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = String(i + 1);
+      b.setAttribute('aria-label', (i + 1) + '단계: ' + s.title);
+      b.addEventListener('click', function () { stop(); render(i); });
+      ui.dots.appendChild(b);
+      return b;
+    });
+  }
+
+  function render(i) {
+    var steps = modes[mode].steps;
+    cur = Math.max(0, Math.min(i, steps.length - 1));
+
+    Object.keys(nodes).forEach(function (k) {
+      var n = nodes[k];
+      n.setAttribute('class', n.__base);
+      if (n.__text !== null) n.textContent = n.__text;
+      if (n.__tr !== null) n.setAttribute('transform', n.__tr); else n.removeAttribute('transform');
+      if (n.__style !== null) n.setAttribute('style', n.__style); else n.removeAttribute('style');
+    });
+    var all = [cfg.base || {}].concat(steps.slice(0, cur + 1).map(function (s) { return s.set || {}; }));
+    all.forEach(function (set) { Object.keys(set).forEach(function (k) { apply(k, set[k]); }); });
+
+    var s = steps[cur];
+    root.classList.remove('tone-warn', 'tone-bad', 'tone-ok');
+    if (s.tone) root.classList.add('tone-' + s.tone);
+    var status = s.status !== undefined ? s.status : (cfg.status !== undefined ? cfg.status : '서비스 정상');
+    ui.status.textContent = status;
+    ui.status.style.visibility = status ? '' : 'hidden';
+    ui.stepno.textContent = 'STEP ' + (cur + 1) + ' / ' + steps.length;
+    ui.desc.innerHTML = '<b>' + s.title + '</b> — ' + s.desc;
+    if (ui.bar && s.meter) {
+      ui.bar.style.width = s.meter[0] + '%';
+      ui.barval.textContent = s.meter[1];
+    }
+
+    modeKeys.forEach(function (k) { if (modes[k].btn) modes[k].btn.setAttribute('aria-pressed', k === mode ? 'true' : 'false'); });
+    dots.forEach(function (b, n) { b.setAttribute('aria-current', n === cur ? 'true' : 'false'); });
+    ui.prev.disabled = cur === 0;
+    ui.next.disabled = cur === steps.length - 1;
+  }
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    ui.play.textContent = '▶ 자동 재생';
+  }
+
+  ui.prev.addEventListener('click', function () { stop(); render(cur - 1); });
+  ui.next.addEventListener('click', function () { stop(); render(cur + 1); });
+  ui.play.addEventListener('click', function () {
+    if (timer) { stop(); return; }
+    var last = modes[mode].steps.length - 1;
+    if (cur === last) render(0);
+    ui.play.textContent = '❚❚ 정지';
+    timer = setInterval(function () {
+      if (cur === modes[mode].steps.length - 1) { stop(); return; }
+      render(cur + 1);
+    }, cfg.interval || 2600);
+  });
+
+  buildDots();
+  render(0);
+};
+</script>

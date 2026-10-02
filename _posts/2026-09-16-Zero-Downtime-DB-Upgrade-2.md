@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "무중단 DB 업그레이드 - 2. MySQL 편"
+title:  "무중단 DB 업그레이드 - 2. MySQL"
 date:   2026-09-27 21:25:00 +0900
 categories: dev
 img-overlay: 0.1
@@ -114,7 +114,7 @@ done
 
 첫번째는 MySQL driver 의 query 였습니다. MySQL driver 에서 연결을 맺을 때, 해당 연결의 session variable 들을 읽어오면서 Multiplexing 이 꺼졌습니다. (예시: [mysql-connector-j](https://github.com/mysql/mysql-connector-j/blob/1c3f5c149e0bfe31c7fbeb24e2d260cd890972c4/src/main/core-impl/java/com/mysql/cj/NativeSession.java#L494-L503)) mysql-connector-j 에서는 session variable 들을 조회해서 그 값을 저장해놓고, 필요할 때 해당 값들을 메모리에서 읽어오고 있었습니다. 이 문제의 해결책은 "해당 값을 Select 만 했을때는 Multiplexing 이 꺼지지 않아도 설정하는 것"입니다. 왜냐하면 만약 누군가 변경을 하는 경우엔 Multiplexing 이 꺼지게 되면서 해당 뒷단 연결은 변경을 한 앞단 연결에 독점배정이 되면서, 해당 앞단 연결이 사라지면 뒷단 연결도 사라지기에, Multiplexing 이 가능한 뒷단의 session variable 들은 모두 DB 의 연결 초기값일 것입니다. 따라서 독점배정이 안된 뒷단 연결들 사이의 해당 session variable 들은 모두 일치할것이기 때문에 Select 에 한해서는 Multiplexing 이 꺼지지 않아도 됩니다.
 
-<< visualization >>
+{% include viz/multiplexing-select.html %}
 
 이런 경우를 처리하기 위해 ProxySQL 에는 mysql_query_rules 라는 기능이 있습니다. mysql_query_rules 를 통해 "특정 regex 에 해당하는 query 에 대해서는 Multiplexing 을 끄지 않는다"는 설정을 할수 있고, [mysql driver 같은 문제의 해결책으로 이를 사용하는걸 ProxySQL 측에서 권장합니다.](https://github.com/sysown/proxysql/issues/1632#issuecomment-414032364)
 
@@ -197,7 +197,7 @@ LOAD MYSQL SERVERS TO RUNTIME;
 SAVE MYSQL SERVERS TO DISK;
 ```
 
-<< visualization 추가하기 >>
+{% include viz/mysql-switchover.html %}
 
 # 추가적인 내용
 
@@ -219,7 +219,7 @@ ProxySQL Mirroring 은 아니지만 개발자가 만들어주신 benchmark 를 �
 만약 8.0 으로 업그레이드를 했는데, 이전에 발견하지 못한 큰 문제가 있어서 롤백을 해야될수도 있다고 생각했습니다. 그 때를 대비하기 위해서는 8.0 DB 로부터 replication 을 받는 5.5 DB 를 만들어놓아야지만, 정합성문제 없이 DB 롤백이 가능해집니다. 하지만 MySQL 의 binlog replication 은 원래 minor 버전 한 단계 위 버전에서 받아오는것만 정식지원합니다. 즉, 업그레이드 하는 방향으로는 한 버전씩 replication 을 정식지원하지, 역방향이나 2 단계 이상씩 뛰어넘는 replication 을 정식 지원하지 않습니다. 그렇기에 정방향이긴 하지만 5.5 -> 8.0 의 replication 도 정식지원을 따르기 위해서는 중간 단계의 DB 를 하나씩 더 만들어서 5.5 -> 5.6 -> 5.7 -> 8.0 으로 한단계씩 진행해야 되는게 정확하긴 합니다.
 5.5 -> 8.0 의 경우, replication 설정을 하고, 정합성 체크를 여러번 돌려서 문제가 없다는걸 확인하여 진행할수 있었지만, 8.0 -> 5.5 는 binlog replication 이 안되었습니다. 그래서 AWS DMS 를 사용해서 replication 을 진행시켰습니다. AWS DMS 는 약간의 딜레이가 있기 때문에 Replication lag 를 따라잡는데 5초 이상 걸렸지만, 이 rollback 을 사용할 정도의 큰 문제가 생긴 이상, 5초 이상의 replication lag 는 감수하기로 결정했었습니다. 실제로는 이 롤백 플랜이 사용되진 않긴 했습니다.
 
-<< visualization. MySQL 5.5 -> 8.0 -> 5.5 로 만들어놓고 앞에 ProxySQL 이 5.5 가리키다가, 8.0 으로 바꿨다가, 문제가 생기면 밑의 5.5 로 가는 것. 앞에는 binlog replication, 뒤에건 AWS DMS 인걸 표시해주자. >>
+{% include viz/mysql-rollback.html %}
 
 # 총평
 

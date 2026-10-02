@@ -1,0 +1,178 @@
+{% include viz/stepper.html %}
+<figure>
+<div class="vz vz-lg" id="mso1">
+  <div class="vz-head">
+    <span class="vz-stepno" data-vz="stepno"></span>
+    <div class="vz-seg" data-vz="seg" role="group" aria-label="Switchover 결과"></div>
+    <span class="vz-status" data-vz="status"></span>
+  </div>
+
+  <svg viewBox="0 0 730 346" role="img" aria-label="ProxySQL 을 사용한 MySQL Switchover 과정">
+    <defs>
+      <marker id="mso1-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#2B8728"></path>
+      </marker>
+    </defs>
+
+    <!-- links -->
+    <path class="link" data-k="a0" d="M108 110 L 140 110"></path>
+    <path class="link" data-k="a1" d="M108 170 L 140 170"></path>
+    <path class="link" data-k="a2" d="M108 230 L 140 230"></path>
+    <path class="link" data-k="po" d="M430 120 C 452 120, 450 95, 470 95"></path>
+    <path class="link" data-k="pn" d="M430 230 C 452 230, 450 278, 470 278"></path>
+
+    <!-- app servers -->
+    <rect class="box" x="8" y="90" width="100" height="40" rx="8"></rect>
+    <rect class="box" x="8" y="150" width="100" height="40" rx="8"></rect>
+    <rect class="box" x="8" y="210" width="100" height="40" rx="8"></rect>
+    <text class="t-sub" x="58" y="115" text-anchor="middle">App 서버 1</text>
+    <text class="t-sub" x="58" y="175" text-anchor="middle">App 서버 2</text>
+    <text class="t-sub" x="58" y="235" text-anchor="middle">App 서버 3</text>
+    <text class="t-note" x="58" y="278" text-anchor="middle" data-k="ast1"></text>
+    <text class="t-note" x="58" y="296" text-anchor="middle" data-k="ast2"></text>
+
+    <!-- proxysql -->
+    <rect class="box box-proxy" x="140" y="30" width="290" height="306" rx="10"></rect>
+    <text class="t-title" x="285" y="60" text-anchor="middle">ProxySQL</text>
+    <text class="t-hdr" x="156" y="92">mysql_servers</text>
+    <text class="t-sub" x="156" y="123">이전 DB (5.5)</text>
+    <g class="pill" data-k="pold">
+      <rect x="272" y="105" width="146" height="26" rx="13"></rect>
+      <text class="t-tag" x="345" y="123" text-anchor="middle" data-k="poldt">ONLINE</text>
+    </g>
+    <text class="t-sub" x="156" y="161">새 DB (8.0)</text>
+    <g class="pill" data-k="pnew">
+      <rect x="272" y="143" width="146" height="26" rx="13"></rect>
+      <text class="t-tag" x="345" y="161" text-anchor="middle" data-k="pnewt">사용 안함</text>
+    </g>
+    <line x1="156" y1="188" x2="418" y2="188" stroke="#e7e9eb" stroke-width="1"></line>
+    <text class="t-sub" x="156" y="216">이전 DB 로의 뒷단 연결</text>
+    <text class="t-tag" x="418" y="216" text-anchor="end" data-k="conn">2개</text>
+    <text class="t-sub" x="156" y="244">보류중인 query</text>
+    <text class="t-tag" x="418" y="244" text-anchor="end" data-k="hold">0개</text>
+    <text class="t-note" x="285" y="310" text-anchor="middle" data-k="pnote"></text>
+
+    <!-- old db -->
+    <rect class="box box-blue" data-k="bold" x="470" y="30" width="252" height="124" rx="10"></rect>
+    <text class="t-title" x="596" y="58" text-anchor="middle" style="fill:#2563eb">이전 DB · 5.5</text>
+    <text class="t-mono" x="486" y="90">processlist</text>
+    <text class="t-tag" x="706" y="90" text-anchor="end" data-k="oproc">app 2개</text>
+    <text class="t-hdr" x="486" y="118">show master status</text>
+    <text class="t-mono" x="486" y="140">Position</text>
+    <text class="t-tag" x="706" y="140" text-anchor="end" data-k="opos">4120</text>
+
+    <!-- replication -->
+    <path class="link recv" data-k="repl" d="M596 160 L 596 210" marker-end="url(#mso1-arw)"></path>
+    <text class="t-tag" x="608" y="190" style="fill:#2B8728">binlog replication</text>
+
+    <!-- new db -->
+    <rect class="box box-green" x="470" y="216" width="252" height="120" rx="10"></rect>
+    <text class="t-title" x="596" y="244" text-anchor="middle" style="fill:#2B8728">새 DB · 8.0</text>
+    <text class="t-hdr" x="486" y="272">show slave status</text>
+    <text class="t-mono" x="486" y="296">Read_Master_Log_Pos</text>
+    <text class="t-tag" x="706" y="296" text-anchor="end" data-k="nread">4096</text>
+    <text class="t-mono" x="486" y="320">Exec_Master_Log_Pos</text>
+    <text class="t-tag" x="706" y="320" text-anchor="end" data-k="nexec">4050</text>
+  </svg>
+
+  <div class="vz-checks">
+    <span class="vz-checks-label">확인 조건</span>
+    <span class="vz-check" data-k="k0">ProxySQL 뒷단 연결 0개</span>
+    <span class="vz-check" data-k="k1">processlist 에 app 연결 없음</span>
+    <span class="vz-check" data-k="k2">binlog 위치 3개가 같음</span>
+  </div>
+
+  <div class="vz-meter">
+    <span class="vz-meter-label">경과 시간 / 타임아웃</span>
+    <div class="vz-bar"><div class="vz-bar-fill" data-vz="bar"></div></div>
+    <span class="vz-meter-val" data-vz="barval"></span>
+  </div>
+
+  <p class="vz-desc" data-vz="desc"></p>
+
+  <div class="vz-ctrl">
+    <button type="button" data-vz="prev" aria-label="이전 단계">◀</button>
+    <div class="vz-dots" data-vz="dots"></div>
+    <button type="button" data-vz="next" aria-label="다음 단계">▶</button>
+    <button type="button" class="vz-play" data-vz="play">▶ 자동 재생</button>
+  </div>
+</div>
+<figcaption>ProxySQL 을 사용한 MySQL Switchover 과정 (숫자는 예시)</figcaption>
+</figure>
+
+<script>
+(function () {
+  var GREEN = '#2B8728';
+  var RED = '#BA313B';
+  var HOLD = '#BA6C31';
+  var KEEP = { ast1: { t: '앞단 연결은', f: GREEN }, ast2: { t: '끊기지 않음', f: GREEN } };
+  function W(o) { o.tone = 'warn'; o.status = '서비스 정상 (latency 증가)'; return o; }
+  function M(a, b) { var o = {}; [a, b].forEach(function (x) { Object.keys(x).forEach(function (k) { o[k] = x[k]; }); }); return o; }
+
+  var start = {
+    title: '시작',
+    meter: [0, '0.0초'],
+    desc: 'App 서버들은 ProxySQL 을 통해 이전 DB (5.5) 를 사용합니다. 새 DB (8.0) 는 ProxySQL 에 등록만 되어 있고 사용하지 않으며, binlog replication 으로 이전 DB 를 따라가고 있습니다.'
+  };
+  var soft = W({
+    title: '1. OFFLINE_SOFT',
+    set: { pold: 'warn', poldt: { t: 'OFFLINE_SOFT' }, a2: 'hold', hold: { t: '1개', f: HOLD },
+           k0: 'no', k1: 'no', k2: 'no', pnote: { t: '새 뒷단 연결을 만들지 않음' } },
+    meter: [10, '0.5초'],
+    desc: '이전 DB 를 <code>OFFLINE_SOFT</code> 로 바꾸고 타이머를 시작합니다. 이미 쓰고 있는 뒷단 연결은 그대로 쓰지만, 새 뒷단 연결은 만들지 않습니다. 서버 3 의 새 query 는 ProxySQL 안에서 <b>보류</b>됩니다.'
+  });
+  var drain1 = W({
+    title: '2. polling — draining 중',
+    set: { a1: 'hold', conn: { t: '1개' }, hold: { t: '2개', f: HOLD },
+           oproc: { t: 'app 1개' }, opos: { t: '4180' }, nread: { t: '4150' } },
+    meter: [18, '0.9초'],
+    desc: '서버 2 의 query 가 끝나서 뒷단 연결이 반납되었고, 새로 만들지 않기 때문에 그대로 사라집니다. 스크립트는 <b>확인 조건</b> 3개를 계속 polling 합니다.'
+  });
+  var drain2 = W({
+    title: '2. polling — draining 완료',
+    set: { a0: 'hold', po: 'hide', conn: { t: '0개', f: GREEN }, hold: { t: '3개', f: HOLD },
+           oproc: { t: '✓ app 없음', f: GREEN }, opos: { t: '4210' }, nread: { t: '4210' }, nexec: { t: '4180' },
+           repl: 'fast', k0: 'ok', k1: 'ok', bold: 'box-off', pnote: { t: '모든 query 를 보류중' } },
+    meter: [26, '1.3초'],
+    desc: '서버 1 의 transaction 도 끝나서 이전 DB 로의 연결이 0개가 되었습니다. 이제 이전 DB 에는 변경이 더 생기지 않습니다. 남은 것은 새 DB 가 <b>마지막 binlog 까지 실행</b>하는 것입니다.'
+  });
+  var caught = W({
+    title: '2. polling — 복제 완료',
+    set: { opos: { t: '✓ 4210', f: GREEN }, nread: { t: '✓ 4210', f: GREEN }, nexec: { t: '✓ 4210', f: GREEN }, repl: '', k2: 'ok' },
+    meter: [32, '1.6초'],
+    desc: '이전 DB 의 <code>Position</code> 과 새 DB 의 <code>Read_Master_Log_Pos</code>, <code>Exec_Master_Log_Pos</code> 가 모두 4210 으로 같아졌습니다. 확인 조건 3개가 모두 만족되었습니다.'
+  });
+  var online = {
+    title: '3. 새 DB 를 ONLINE',
+    set: M({ pnew: 'go', pnewt: { t: 'ONLINE' }, a0: 'recv', a1: 'recv', a2: 'recv', pn: 'recv',
+             hold: { t: '0개', f: GREEN }, pnote: { t: '보류한 query 를 새 DB 로 전달' } }, KEEP),
+    tone: 'ok', status: '서비스 정상', meter: [36, '1.8초'],
+    desc: '새 DB 를 <code>ONLINE</code> 으로 바꿉니다. ProxySQL 이 보류하고 있던 query 들을 <b>새 DB 로 보냅니다.</b> 서버 입장에서는 query 가 2초 정도 느려진 것뿐이고, 앞단 연결은 한번도 끊기지 않았습니다.'
+  };
+
+  var stuck = {
+    title: '2. polling — 타임아웃',
+    set: { a1: 'hold', conn: { t: '1개', f: RED }, hold: { t: '2개', f: HOLD },
+           oproc: { t: '✗ app 1개', f: RED }, pnote: { t: '긴 transaction 이 끝나지 않음' } },
+    tone: 'bad', status: '타임아웃', meter: [100, '타임아웃'],
+    desc: '서버 1 의 transaction 이 너무 길어서, 타임아웃 안에 이전 DB 로의 연결이 0개가 되지 않았습니다.'
+  };
+  var rollback = {
+    title: '4. 롤백',
+    set: M({ pold: 'on', poldt: { t: 'ONLINE' }, a1: 'run', a2: 'run', po: 'run',
+             hold: { t: '0개', f: GREEN }, pnote: { t: '보류한 query 를 이전 DB 로 전달' } }, KEEP),
+    tone: 'warn', status: '서비스 정상 (다시 시도)', meter: [100, '타임아웃'],
+    desc: '이전 DB 를 다시 <code>ONLINE</code> 으로 바꿉니다. 보류하고 있던 query 들은 <b>이전 DB 로</b> 갑니다. 요청은 실패하지 않고 그만큼 느려지기만 하고, 다음에 Switchover 를 다시 시도하면 됩니다.'
+  };
+
+  vzStepper({
+    id: 'mso1',
+    base: { a0: 'run', a1: 'run', a2: 'run', po: 'run', pn: 'hide', pold: 'on', pnew: 'off',
+            oproc: { f: '#444' }, opos: { f: '#444' }, nread: { f: '#444' }, nexec: { f: '#444' } },
+    modes: {
+      ok: { label: '성공', steps: [start, soft, drain1, drain2, caught, online] },
+      timeout: { label: '타임아웃 → 롤백', steps: [start, soft, stuck, rollback] }
+    }
+  });
+})();
+</script>

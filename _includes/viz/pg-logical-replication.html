@@ -1,0 +1,145 @@
+{% include viz/stepper.html %}
+<figure>
+<div class="vz" id="pgr1">
+  <div class="vz-head">
+    <span class="vz-stepno" data-vz="stepno"></span>
+    <span class="vz-status" data-vz="status"></span>
+  </div>
+
+  <svg viewBox="0 0 860 310" role="img" aria-label="Aurora Clone 으로 logical replication 을 받는 새 DB 만들기">
+    <defs>
+      <marker id="pgr1-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#2B8728"></path>
+      </marker>
+      <marker id="pgr1-k" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#8b9097"></path>
+      </marker>
+    </defs>
+
+    <!-- 이전 DB -->
+    <rect class="box box-blue" x="20" y="24" width="280" height="168" rx="10"></rect>
+    <text class="t-title" x="160" y="52" text-anchor="middle" style="fill:#2563eb">이전 DB</text>
+    <text class="t-sub" x="160" y="72" text-anchor="middle">Aurora PostgreSQL · 이전 버전</text>
+    <g class="pill on fade" data-k="opub">
+      <rect x="40" y="90" width="240" height="26" rx="13"></rect>
+      <text class="t-tag" x="160" y="107" text-anchor="middle">publication</text>
+    </g>
+    <g class="pill on fade" data-k="oslot">
+      <rect x="40" y="124" width="240" height="26" rx="13"></rect>
+      <text class="t-tag" x="160" y="141" text-anchor="middle">replication slot (WAL 보존)</text>
+    </g>
+    <text class="t-note" x="160" y="176" text-anchor="middle" data-k="onote"></text>
+
+    <!-- 가운데 화살표 -->
+    <g class="fade" data-k="gclone">
+      <path d="M304 66 L 552 66" fill="none" stroke="#8b9097" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#pgr1-k)"></path>
+      <text class="t-tag" x="428" y="56" text-anchor="middle" style="fill:#6b7076">Aurora Clone</text>
+    </g>
+    <path class="link" data-k="sub" d="M304 150 L 552 150" marker-end="url(#pgr1-g)"></path>
+    <text class="t-tag fade" x="428" y="140" text-anchor="middle" data-k="subt">logical replication</text>
+
+    <!-- 새 DB -->
+    <g class="fade" data-k="gnew">
+      <rect class="box box-green" x="556" y="24" width="284" height="168" rx="10"></rect>
+      <text class="t-title" x="698" y="52" text-anchor="middle" style="fill:#2B8728">새 DB</text>
+      <text class="t-sub" x="698" y="72" text-anchor="middle" data-k="nver">Aurora PostgreSQL · 이전 버전</text>
+      <g class="pill off fade" data-k="npub">
+        <rect x="578" y="90" width="240" height="26" rx="13"></rect>
+        <text class="t-tag" x="698" y="107" text-anchor="middle">publication (복사됨)</text>
+      </g>
+      <g class="pill off fade" data-k="nslot">
+        <rect x="578" y="124" width="240" height="26" rx="13"></rect>
+        <text class="t-tag" x="698" y="141" text-anchor="middle">replication slot (복사됨)</text>
+      </g>
+      <g class="pill fade" data-k="nsub">
+        <rect x="578" y="90" width="240" height="26" rx="13"></rect>
+        <text class="t-tag" x="698" y="107" text-anchor="middle" data-k="nsubt">subscription (disabled)</text>
+      </g>
+      <g class="pill on fade" data-k="norg">
+        <rect x="578" y="124" width="240" height="26" rx="13"></rect>
+        <text class="t-tag" x="698" y="141" text-anchor="middle">replication origin → B</text>
+      </g>
+      <text class="t-note" x="698" y="176" text-anchor="middle" data-k="nnote"></text>
+    </g>
+
+    <!-- WAL timeline -->
+    <text class="t-hdr" x="40" y="226">이전 DB 의 WAL</text>
+    <line x1="40" y1="262" x2="820" y2="262" stroke="#d7dade" stroke-width="2"></line>
+    <rect class="fade" data-k="segab" x="180" y="256" width="220" height="12" rx="3" style="fill:#d7dade"></rect>
+    <text class="t-note fade" x="290" y="248" text-anchor="middle" data-k="segabt">Clone 에 이미 포함 → 건너뜀</text>
+    <rect class="fade" data-k="segbh" x="400" y="256" width="360" height="12" rx="3" style="fill:rgba(43,135,40,.35)"></rect>
+    <text class="t-note fade" x="580" y="248" text-anchor="middle" data-k="segbht" style="fill:#2B8728">subscription 으로 받는 변경</text>
+    <g class="fade" data-k="ma">
+      <circle cx="180" cy="262" r="6" style="fill:#2563eb"></circle>
+      <text class="t-tag" x="180" y="290" text-anchor="middle" style="fill:#2563eb">A · slot 생성</text>
+    </g>
+    <g class="fade" data-k="mb">
+      <circle cx="400" cy="262" r="6" style="fill:#2B8728"></circle>
+      <text class="t-tag" x="400" y="290" text-anchor="middle" style="fill:#2B8728" data-k="mbt">B · Clone 시점</text>
+    </g>
+    <g data-k="head" transform="translate(240,0)">
+      <path d="M0 250 L 0 274" stroke="#111" stroke-width="2"></path>
+      <text class="t-sub" x="0" y="306" text-anchor="middle">현재</text>
+    </g>
+  </svg>
+
+  <p class="vz-desc" data-vz="desc"></p>
+
+  <div class="vz-ctrl">
+    <button type="button" data-vz="prev" aria-label="이전 단계">◀</button>
+    <div class="vz-dots" data-vz="dots"></div>
+    <button type="button" data-vz="next" aria-label="다음 단계">▶</button>
+    <button type="button" class="vz-play" data-vz="play">▶ 자동 재생</button>
+  </div>
+</div>
+<figcaption>Aurora Clone 으로 logical replication 을 받는 새 DB 만들기</figcaption>
+</figure>
+
+<script>
+vzStepper({
+  id: 'pgr1',
+  status: '서비스 영향 없음',
+  base: { opub: 'hide', oslot: 'hide', gclone: 'hide', sub: 'hide', subt: 'hide', gnew: 'hide',
+          npub: 'hide', nslot: 'hide', nsub: 'hide', norg: 'hide',
+          segab: 'hide', segabt: 'hide', segbh: 'hide', segbht: 'hide', ma: 'hide', mb: 'hide' },
+  steps: [
+    { title: '1. publication, slot 생성',
+      set: { opub: '', oslot: '', ma: '', onote: { t: '이 시점(A) 부터 WAL 이 지워지지 않음' } },
+      desc: '이전 DB 에 publication 과 replication slot 을 만듭니다. slot 을 <b>미리</b> 만들어야, 이 시점(A) 이후의 WAL 이 지워지지 않고 남아 있습니다.' },
+
+    { title: '2. Clone DB 생성',
+      set: { gclone: '', gnew: '', npub: '', nslot: '', mb: '', head: { tr: 'translate(424,0)' }, onote: { t: '' },
+             nnote: { t: 'B 시점까지의 데이터가 들어 있음' } },
+      desc: 'AWS 의 Create Clone 으로 새 DB 를 만듭니다. 새 DB 는 Clone 시점(B) 까지의 데이터를 가지고 있고, 이전 DB 의 publication 과 slot 도 <b>같이 복사</b>되어 있습니다.' },
+
+    { title: '3. 초기 LSN 확인',
+      set: { head: { tr: 'translate(450,0)' }, mbt: { t: 'B · 초기 LSN' },
+             nnote: { t: 'aurora_volume_logical_start_lsn() = B' } },
+      desc: '새 DB 에서 <code>aurora_volume_logical_start_lsn()</code> 으로 <b>초기 LSN (B)</b> 을 확인합니다. 새 DB 가 이전 DB 의 WAL 을 어디까지 가지고 있는지 알려주는 값입니다.' },
+
+    { title: '4. 복사된 publication, slot 삭제',
+      set: { gclone: 'hide', npub: 'hide', nslot: 'hide', head: { tr: 'translate(480,0)' }, nnote: { t: '' } },
+      desc: '새 DB 에 같이 복사된 publication 과 replication slot 은 쓰지 않기 때문에 지웁니다.' },
+
+    { title: '5. 새 DB 버전 업그레이드',
+      set: { nver: { t: 'Aurora PostgreSQL · 새 버전', f: '#2B8728' }, head: { tr: 'translate(560,0)' },
+             onote: { t: 'slot 덕분에 그 동안의 WAL 도 남아 있음' } },
+      desc: 'AWS 콘솔에서 새 DB 의 버전을 업그레이드합니다. 그 동안에도 이전 DB 에는 변경이 쌓이지만, slot 이 있어서 WAL 은 지워지지 않습니다.' },
+
+    { title: '6. Subscription 생성 (disabled)',
+      set: { nsub: '', sub: 'off', subt: '', head: { tr: 'translate(600,0)' }, onote: { t: '' } },
+      desc: '새 DB 에 이전 DB 의 publication 을 받는 Subscription 을 만듭니다. <code>enabled = false</code> 로 만들어서, 시작 위치를 정하기 전에는 replication 이 시작되지 않게 합니다.' },
+
+    { title: '7. 시작 LSN 을 B 로 설정',
+      set: { norg: '', segab: '', segabt: '', head: { tr: 'translate(640,0)' },
+             nnote: { t: 'pg_replication_origin_advance(…, B)' } },
+      desc: '<code>pg_replication_origin_advance</code> 로 replication 을 <b>B 부터</b> 받도록 설정합니다. A ~ B 사이의 변경은 Clone 에 이미 들어 있기 때문에 건너뛰어야 같은 변경이 두번 들어가지 않습니다.' },
+
+    { title: '8. 논리 복제 활성화',
+      set: { nsub: 'go', nsubt: { t: 'subscription (enabled)' }, sub: 'recv', segbh: '', segbht: '',
+             head: { tr: 'translate(760,0)' }, nnote: { t: '이전 DB 의 변경사항을 따라가는 중' } },
+      tone: 'ok', status: 'replication 진행중',
+      desc: 'Subscription 을 enable 합니다. 이제 새 DB 는 B 이후의 변경사항을 logical replication 으로 받으면서, 이전 DB 를 계속 따라갑니다.' }
+  ]
+});
+</script>

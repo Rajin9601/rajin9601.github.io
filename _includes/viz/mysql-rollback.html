@@ -1,0 +1,83 @@
+{% include viz/stepper.html %}
+<figure>
+<div class="vz" id="mrb1">
+  <div class="vz-head">
+    <span class="vz-stepno" data-vz="stepno"></span>
+    <span class="vz-status" data-vz="status"></span>
+  </div>
+
+  <svg viewBox="0 0 860 280" role="img" aria-label="MySQL 8.0 업그레이드의 Rollback Plan">
+    <defs>
+      <marker id="mrb1-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#2B8728"></path>
+      </marker>
+      <marker id="mrb1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#BA6C31"></path>
+      </marker>
+    </defs>
+
+    <!-- proxysql -> db -->
+    <path class="link" data-k="lo" d="M380 66 C 260 66, 140 90, 140 150"></path>
+    <path class="link" data-k="ln" d="M430 82 L 430 150"></path>
+    <path class="link" data-k="lr" d="M480 66 C 600 66, 720 90, 720 150"></path>
+
+    <rect class="box box-proxy" x="330" y="22" width="200" height="60" rx="10"></rect>
+    <text class="t-title" x="430" y="50" text-anchor="middle">ProxySQL</text>
+    <text class="t-sub" x="430" y="69" text-anchor="middle" data-k="pt">→ 5.5 (이전 DB)</text>
+
+    <!-- dbs -->
+    <rect class="box box-blue" data-k="bo" x="40" y="150" width="200" height="86" rx="10"></rect>
+    <text class="t-title" x="140" y="182" text-anchor="middle" style="fill:#2563eb">MySQL 5.5</text>
+    <text class="t-sub" x="140" y="202" text-anchor="middle">이전 DB</text>
+    <text class="t-tag" x="140" y="222" text-anchor="middle" data-k="so"></text>
+
+    <rect class="box box-green" data-k="bn" x="330" y="150" width="200" height="86" rx="10"></rect>
+    <text class="t-title" x="430" y="182" text-anchor="middle" style="fill:#2B8728">MySQL 8.0</text>
+    <text class="t-sub" x="430" y="202" text-anchor="middle">새 DB</text>
+    <text class="t-tag" x="430" y="222" text-anchor="middle" data-k="sn"></text>
+
+    <rect class="box box-amber" data-k="br" x="620" y="150" width="200" height="86" rx="10"></rect>
+    <text class="t-title" x="720" y="182" text-anchor="middle" style="fill:#BA6C31">MySQL 5.5</text>
+    <text class="t-sub" x="720" y="202" text-anchor="middle">롤백용 DB</text>
+    <text class="t-tag" x="720" y="222" text-anchor="middle" data-k="sr"></text>
+
+    <!-- replication -->
+    <path class="link recv" data-k="r1" d="M244 193 L 326 193" marker-end="url(#mrb1-g)"></path>
+    <text class="t-tag" x="285" y="258" text-anchor="middle" style="fill:#2B8728" data-k="r1t">binlog replication</text>
+    <path class="link warn" data-k="r2" d="M534 193 L 616 193" marker-end="url(#mrb1-a)"></path>
+    <text class="t-tag" x="575" y="258" text-anchor="middle" style="fill:#BA6C31" data-k="r2t">AWS DMS</text>
+  </svg>
+
+  <p class="vz-desc" data-vz="desc"></p>
+
+  <div class="vz-ctrl">
+    <button type="button" data-vz="prev" aria-label="이전 단계">◀</button>
+    <div class="vz-dots" data-vz="dots"></div>
+    <button type="button" data-vz="next" aria-label="다음 단계">▶</button>
+    <button type="button" class="vz-play" data-vz="play">▶ 자동 재생</button>
+  </div>
+</div>
+<figcaption>8.0 의 변경사항을 다시 5.5 로 받아두는 Rollback Plan</figcaption>
+</figure>
+
+<script>
+vzStepper({
+  id: 'mrb1',
+  base: { lo: 'run', ln: 'hide', lr: 'hide', so: { t: '사용중', f: '#2563eb' }, sn: { t: 'read_only (복제중)', f: '#6b7076' }, sr: { t: 'read_only (복제중)', f: '#6b7076' } },
+  steps: [
+    { title: '준비',
+      desc: '업그레이드 전에 DB 3개를 연결해 둡니다. 5.5 → 8.0 은 <b>binlog replication</b> 으로, 8.0 → 롤백용 5.5 는 binlog replication 이 되지 않아서 <b>AWS DMS</b> 로 복제합니다. ProxySQL 은 아직 이전 5.5 를 사용합니다.' },
+
+    { title: 'Switchover',
+      set: { lo: 'hide', ln: 'recv', pt: { t: '→ 8.0 (새 DB)' }, bo: 'box-off', so: { t: '사용 안함', f: '#9aa0a6' },
+             sn: { t: '사용중', f: '#2B8728' }, r1: 'off', r1t: { f: '#9aa0a6' } },
+      desc: 'Switchover 로 ProxySQL 이 8.0 을 사용합니다. 이전 5.5 에는 더 이상 변경이 생기지 않습니다. 8.0 의 변경사항은 AWS DMS 를 통해 <b>롤백용 5.5 에 계속 쌓입니다.</b>' },
+
+    { title: '문제 발생 → 롤백',
+      set: { ln: 'hide', lr: 'warn', pt: { t: '→ 롤백용 5.5' }, bn: 'box-off', sn: { t: '사용 안함', f: '#9aa0a6' },
+             sr: { t: '사용중', f: '#BA6C31' }, r2: 'off', r2t: { f: '#9aa0a6' } },
+      tone: 'warn', status: '롤백',
+      desc: '8.0 에서 미리 발견하지 못한 큰 문제가 생기면, 롤백용 5.5 로 Switchover 합니다. 8.0 에서 생긴 변경사항도 DMS 로 모두 받았기 때문에 <b>데이터 정합성 문제 없이</b> 5.5 로 돌아갈 수 있습니다. (실제로는 이 롤백 플랜을 사용하지 않았습니다.)' }
+  ]
+});
+</script>

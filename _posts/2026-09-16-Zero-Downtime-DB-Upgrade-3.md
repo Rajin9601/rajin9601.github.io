@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "무중단 DB 업그레이드 - 3. PostgreSQL 편"
+title:  "무중단 DB 업그레이드 - 3. PostgreSQL"
 date:   2026-09-27 21:25:00 +0900
 categories: dev
 img-overlay: 0.1
@@ -146,7 +146,7 @@ Aurora Cluster 로 부터 logical replication 을 받는 새로운 Aurora Cluste
 
    </details>
 
-<< visualization 여기 추가 >>
+{% include viz/pg-logical-replication.html %}
 
 ## PgBouncer
 
@@ -169,14 +169,22 @@ PgBouncer 에서 transaction pool mode 를 사용하면 transaction 단위로 �
 
 ### 그 외의 PgBouncer 관련 이슈들
 
-1. Certificate 
-  PgBouncer 를 EC2 에 띄웠는데, SSL 를 사용하려면 PgBouncer 가 SSL 연결을 받아줘야 한다. 앞단에 NLB 같은걸로 TLS 로 처리를 하고 싶을수 있지만, PostgreSQL 의 SSL 은 TLS 와 별도로 구현되어있기에 사용할 수 없습니다. PgBouncer 에 그래서 Certificate 를 설정을 해줘야 하는데, trusted CA 로부터 만든 Certificate 를 발급받는게 귀찮았기 때문에, 직접 root CA 도 만들고, client 에서는 ssl mode 를 verify-ca 보다 낮은 설정으로 잠시동안 설정해줬습니다.
-2. tcp keepidle
-  tcp keepidle 관련 설정을 하지 않으면 OS 의 기본값을 사용하는데, Aurora RDS 기본 값보다 너무 길기 때문에 문제가 생길수 있습니다. PostgreSQL 에 설정되어있던 tcp keepidle 설정을 참고해서 PgBouncer 에 설정을 해줘야 됩니다. 
-3. `ignore_startup_parameters`
-  앱 연결 시 PostgreSQL에게 파라미터를 전송하는데 PgBouncer가 모르는 파라미터를 받으면 연결을 거부합니다. 개발환경에서 pgbouncer 를 사용하면서 pgbouncer 로그를 보면 어떤 startup parameter 때문에 문제가 생기는지 알려주기 때문에 개발 환경에서 테스트를 하면서 ignore_startup_parameters 에 추가해줘야 합니다.
-  # PgBouncer 로그에서 아래 메시지 확인
-  # "unsupported startup parameter: <파라미터명>"
+1. **Certificate**
+
+   PgBouncer 를 EC2 에 띄웠는데, SSL 를 사용하려면 PgBouncer 가 SSL 연결을 받아줘야 한다. 앞단에 NLB 같은걸로 TLS 로 처리를 하고 싶을수 있지만, PostgreSQL 의 SSL 은 TLS 와 별도로 구현되어있기에 사용할 수 없습니다. PgBouncer 에 그래서 Certificate 를 설정을 해줘야 하는데, trusted CA 로부터 만든 Certificate 를 발급받는게 귀찮았기 때문에, 직접 root CA 도 만들고, client 에서는 ssl mode 를 verify-ca 보다 낮은 설정으로 잠시동안 설정해줬습니다.
+
+2. **tcp keepidle**
+
+   tcp keepidle 관련 설정을 하지 않으면 OS 의 기본값을 사용하는데, Aurora RDS 기본 값보다 너무 길기 때문에 문제가 생길수 있습니다. PostgreSQL 에 설정되어있던 tcp keepidle 설정을 참고해서 PgBouncer 에 설정을 해줘야 됩니다.
+
+3. **`ignore_startup_parameters`**
+
+   앱 연결 시 PostgreSQL에게 파라미터를 전송하는데 PgBouncer가 모르는 파라미터를 받으면 연결을 거부합니다. 개발환경에서 pgbouncer 를 사용하면서 pgbouncer 로그를 보면 어떤 startup parameter 때문에 문제가 생기는지 알려주기 때문에 개발 환경에서 테스트를 하면서 ignore_startup_parameters 에 추가해줘야 합니다.
+
+   ```
+   # PgBouncer 로그에서 아래 메시지 확인
+   # "unsupported startup parameter: <파라미터명>"
+   ```
 
 ## 결론 : PgBouncer.ini
 
@@ -237,7 +245,7 @@ PostgreSQL 에서 logical replication 을 통해서 Sequence 는 동기화가 �
    - PgBouncer 에서 `RESUME <db>` ← 대기하던 transaction 들이 새로운 DB 로 전달됨
 5. 1~3 단계가 타임아웃을 넘기거나 중간에 에러가 나면, PgBouncer 설정을 이전 DB 로 되돌리고 `RESUME <db>` ← 롤백
 
-<< visualization 추가하기 >>
+{% include viz/pg-switchover.html %}
 
 # 총 마무리
 
