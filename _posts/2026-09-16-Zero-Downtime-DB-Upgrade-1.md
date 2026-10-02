@@ -6,6 +6,7 @@ categories: dev
 img-overlay: 0.1
 comments: true
 draft: true
+series: zero-downtime-db-upgrade
 ---
 
 AWS Managed DB 를 사용하다보면, AWS 에서 DB 버전 업그레이드를 하라는 알림을 받게 됩니다. 업그레이드를 제때 하지 않으면 Extended Support 비용을 내야되고, 그렇다고 업그레이드를 하려면 결국 다운타임이 생기기에 서비스 점검 시간을 걸게 됩니다. (만약 LTS 버전이 아니라면 업그레이드를 거의 1년에 한번씩 하게 됩니다) 그렇기에 많은 회사에서는 서비스 점검시간을 새벽에 가지면서 서비스 공지를 띄우고 작업을 합니다.
@@ -61,4 +62,4 @@ AWS RDS Blue-Green Deployment 에 있는 문제들을 해결해야만 무중단 
 
 포트원의 경우 MySQL, PostgreSQL DB 둘다 사용하고 있기 때문에, 무중단 업그레이드 과정을 두 DB 타입에 대해서 모두 설계해서 실행하였습니다. 다음 글들에서 각 DB 에서 어떻게 무중단 업그레이드를 구현했는지 설명하겠습니다. 
 
-<< 글 시리즈 소개 >>
+{% include series.html title="무중단 DB 업그레이드" %}

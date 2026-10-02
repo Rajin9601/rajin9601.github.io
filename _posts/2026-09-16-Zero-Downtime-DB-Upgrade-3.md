@@ -6,6 +6,7 @@ categories: dev
 img-overlay: 0.1
 comments: true
 draft: true
+series: zero-downtime-db-upgrade
 ---
 
 포트원의 PostgreSQL DB 들은 AWS Aurora 를 사용중이였습니다. 다음 LTS 로 업그레이드를 진행하여 몇년간은 다시 업그레이드를 할 필요없도록 할 생각으로 대부분의 PostgreSQL DB 들을 업그레이드 하였습니다.
@@ -51,53 +52,99 @@ ORDER BY schemaname, tablename;
 Aurora Cluster 로 부터 logical replication 을 받는 새로운 Aurora Cluster 를 만드는 방법은 다음과 같습니다.
 
 1. 이전 DB 에 publication, replication_slot 을 만들어주면서, replication_slot 의 LSN 을 기록해두기 (미리 만들어둬야 WAL 이 이 시점부터 보존이 된다)
+
+   <details markdown="block">
+   <summary>Query</summary>
+
+   ```sql
+   -- 이전 DB 에서 실행
+   CREATE PUBLICATION psql_upgrade_publication FOR ALL TABLES;
+   SELECT pg_create_logical_replication_slot('psql_upgrade_replication_slot', 'pgoutput');
+   ```
+
+   </details>
+
 2. 이전 DB 로 부터 Clone DB 를 AWS 통해서 만들기
-3. 새 DB 의 초기 LSN 을 확인하기 
+3. 새 DB 의 초기 LSN 을 확인하기
+
+   <details markdown="block">
+   <summary>Query</summary>
+
+   ```sql
+   -- 새 DB 에서 실행
+   SELECT aurora_volume_logical_start_lsn();
+   ```
+
+   </details>
+
 4. 새 DB 에 존재하는 publication, replication_slot 삭제하기
+
+   <details markdown="block">
+   <summary>Query</summary>
+
+   ```sql
+   -- 새 DB 에서 실행. Clone 할 때 이전 DB 의 것이 같이 복사되었기 때문에 지운다.
+   SELECT pg_drop_replication_slot('psql_upgrade_replication_slot');
+   DROP PUBLICATION psql_upgrade_publication;
+   ```
+
+   </details>
+
 5. 새 DB 의 버전 업그레이드를 AWS 콘솔에서 진행하기
 6. 새 DB 에 이전 DB 로부터 replication 을 받도록 Subscription 생성 (enabled=false 로 만들어야 됨)
+
+   <details markdown="block">
+   <summary>Query</summary>
+
+   ```sql
+   -- 새 DB 에서 실행. password 가 log 에 남지 않도록 log 설정을 잠시 끈다.
+   BEGIN;
+   SET LOCAL log_statement = 'none';
+   SET LOCAL log_min_duration_statement = -1;
+
+   CREATE SUBSCRIPTION psql_upgrade_subscription
+   CONNECTION 'host=<hostname> dbname=<dbname> user=<user> password=''<password>'''
+   PUBLICATION psql_upgrade_publication
+   WITH (
+     copy_data = false,
+     create_slot = false,
+     enabled = false,
+     connect = true,
+     slot_name = 'psql_upgrade_replication_slot'
+   );
+
+   COMMIT;
+   ```
+
+   </details>
+
 7. replication 을 받기 시작할 LSN 을 step 3 에서 확인한 초기 LSN 으로 설정한다.
+
+   <details markdown="block">
+   <summary>Query</summary>
+
+   ```sql
+   -- 새 DB 에서 실행
+   SELECT * FROM pg_replication_origin;
+
+   -- <roname>: 위 쿼리의 roname 값
+   -- <initial LSN>: Step 3 에서 확인한 새 DB 의 초기 LSN
+   SELECT pg_replication_origin_advance('<roname>', '<initial LSN>');
+   ```
+
+   </details>
+
 8. 논리 복제 활성화.
 
-<< 위에 ordered list 에다가 밑에 있는 query 들을 다 detail summary 처럼 접혀져있는 형태로 넣어주자 >>
+   <details markdown="block">
+   <summary>Query</summary>
 
-1.
-CREATE PUBLICATION psql_upgrade_publication FOR ALL TABLES;
-SELECT pg_create_logical_replication_slot('psql_upgrade_replication_slot', 'pgoutput');
+   ```sql
+   -- 새 DB 에서 실행
+   ALTER SUBSCRIPTION psql_upgrade_subscription ENABLE;
+   ```
 
-3. 
-`SELECT aurora_volume_logical_start_lsn();`
-
-4. 
-SELECT pg_drop_replication_slot('psql_upgrade_replication_slot');
-DROP PUBLICATION psql_upgrade_publication;
-
-6. 
-BEGIN;
-SET LOCAL log_statement = 'none';
-SET LOCAL log_min_duration_statement = -1;
-
-CREATE SUBSCRIPTION psql_upgrade_subscription
-CONNECTION 'host=<hostname> dbname=<dbname> user=<user> password=''<password>'''
-PUBLICATION psql_upgrade_publication
-WITH (
-  copy_data = false,
-  create_slot = false,
-  enabled = false,
-  connect = true,
-  slot_name = 'psql_upgrade_replication_slot'
-);
-
-COMMIT;
-
-7.
-SELECT * FROM pg_replication_origin;
-
--- <roname>: 위 쿼리의 roname 값
--- <initial LSN>: Step 4에서 기록한 Green 초기 LSN
-SELECT pg_replication_origin_advance('<roname>', '<initial LSN>');
-
-8. ALTER SUBSCRIPTION psql_upgrade_subscription ENABLE;
+   </details>
 
 << visualization 여기 추가 >>
 
@@ -109,7 +156,7 @@ PostgreSQL 용 DB Proxy 를 찾다보니 완벽하게 적합한 Proxy 를 찾을
 
 무중단 업그레이드 설계를 보면, 클라이언트와 DB Proxy 사이의 연결(앞단 연결)이 정상적인 상태에서 DB Proxy 와 DB 사이의 연결 (뒷단 연결)이 바뀌어야 합니다. 그래야지 서버(클라이언트)는 아무일이 없는것처럼 느껴지는 상태에서 뒤의 DB 가 바뀔수 있습니다. 하나의 앞단 연결에서 transaction 단위로 DB Proxy 뒷단의 연결을 마음대로 바꿀수 있는 기능을 PgBouncer 에서는 transaction pool mode 라고 합니다.
 
-PgBouncer 에서 transaction pool mode 를 사용하면 transaction 단위로 뒷단의 DB 연결이 달라질수 있기 때문에 [여러 기능들이 제대로 작동하지 않는다고 경고](https://www.pgbouncer.org/features.html)합니다. ProxySQL 에서는 이것들을 우회하거나, 이런 기능을 사용하는 순간 Multiplexing 이 꺼지면서 동작에는 문제가 없도록 해주지만, PgBouncer 는 항상 Multiplexing 켜진 상태로 동작하기 때문에 DB 를 사용하는 곳에서 의도대로 작동하지 않는것을 보게 됩니다. << 의도대로 작동하지 않는 것을 보게 됩니다. 이거 말 이상함.>> 따라서 PgBouncer 의 transaction pool mode 를 사용할 땐 문제가 되는 query 가 존재하는지 확인하고, 존재하면 PgBouncer 설정이 아니라 서버 어플리케이션을 고쳐서 우회해야합니다.
+PgBouncer 에서 transaction pool mode 를 사용하면 transaction 단위로 뒷단의 DB 연결이 달라질수 있기 때문에 [여러 기능들이 제대로 작동하지 않는다고 경고](https://www.pgbouncer.org/features.html)합니다. ProxySQL 에서는 이것들을 우회하거나, 이런 기능을 사용하는 순간 Multiplexing 이 꺼지면서 동작에는 문제가 없도록 해주지만, PgBouncer 는 항상 Multiplexing 이 켜진 상태로 동작하기 때문에, 이런 기능을 사용하는 query 는 에러 없이 실행되더라도 결과는 서버 개발자의 의도와 다를 수 있습니다. 따라서 PgBouncer 의 transaction pool mode 를 사용할 땐 문제가 되는 query 가 존재하는지 확인하고, 존재하면 PgBouncer 설정이 아니라 서버 어플리케이션을 고쳐서 우회해야합니다.
 
 문제가 되는 기능들 중 서버가 사용하고 있던 건 다행히 SET 하나 뿐이였습니다. 
 
@@ -136,10 +183,23 @@ PgBouncer 에서 transaction pool mode 를 사용하면 transaction 단위로 �
 결론적으로 사용했던 PgBouncer 설정 파일 하나를 참고용으로 첨부합니다.
 
 <details markdown="block">
-<summary>PK 검사하는 방법</summary>
+<summary>pgbouncer.ini</summary>
 
-```
-<< ~/work/terraform/aws/port-prod/pgbouncers 참고해서 넣어주기 >>
+```ini
+[databases]
+* = pool_mode=transaction host=<blue db host>
+
+[pgbouncer]
+...
+
+tcp_keepalive = 1
+tcp_keepidle = 300
+
+...
+
+max_prepared_statements = 100
+ignore_startup_parameters = extra_float_digits,options
+server_reset_query_always = 1
 ```
 
 </details>
@@ -162,16 +222,20 @@ PostgreSQL 에서 logical replication 을 통해서 Sequence 는 동기화가 �
 
 ### 결론 : SwitchOver 과정
 
-1. PgBouncer PAUSE        ← 클라이언트 쿼리 대기 시작
-2. switchover marker 삽입    ← 구 DB의 switchover_marker 테이블에 행 삽입
-3. 복제 랙 0 대기         ← 구 DB → 신 DB 복제 완료 확인 (pg_current_wal_lsn(), confirmed_flush_lsn)
-4. switchover marker 확인    ← 신 DB에 marker 행이 복제됐는지 폴링
-5. 시퀀스 동기화
-6. PgBouncer 설정 교체    ← symlink 변경 + RELOAD
-7. PgBouncer RESUME       ← 클라이언트 트래픽 신 DB로 유입
-8. 전환 후 검증
+실제 Switchover 스크립트의 과정은 다음과 같습니다.
 
-1~4 까지 5초 이상 걸리면 롤백
+1. 이전 DB 사용 draining
+   - PgBouncer 에서 `PAUSE <db>` ← 진행중인 transaction 이 끝날때까지 기다리고, 새로운 transaction 은 대기
+   - 이전 DB 의 `pg_stat_activity` 에 서버 어플리케이션의 연결이 없는지 확인
+2. 이전 DB 의 switchover_marker table 에 row 추가
+3. 타임아웃 안에서 아래 조건들이 모두 만족될 때까지 polling
+   - 이전 DB 의 replication slot 의 lag 가 0 (`pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)`)
+   - 2번에서 추가한 marker row 가 새로운 DB 에 존재
+4. 새로운 DB 사용
+   - 이전 DB 의 Sequence 값들을 새로운 DB 에 `setval` 로 반영
+   - PgBouncer 설정 교체 ← `pgbouncer.ini` symlink 를 `green.pgbouncer.ini` 로 바꾸고 `RELOAD`
+   - PgBouncer 에서 `RESUME <db>` ← 대기하던 transaction 들이 새로운 DB 로 전달됨
+5. 1~3 단계가 타임아웃을 넘기거나 중간에 에러가 나면, PgBouncer 설정을 이전 DB 로 되돌리고 `RESUME <db>` ← 롤백
 
 << visualization 추가하기 >>
 
@@ -179,4 +243,4 @@ PostgreSQL 에서 logical replication 을 통해서 Sequence 는 동기화가 �
 
 MySQL 과 PostgreSQL DB 의 무중단 업그레이드를 실행하기 전에 상세한 RunBook 을 만들어놓아서, 실제 실행을 할 때에는 RunBook 을 그대로 따라가면서 실행을 하였고 문제없이 모두 무중단 업그레이드를 완료하였습니다. 회사마다 DB 를 사용하는 방식이 모두 다르기 때문에 해당 블로그 내용 외적으로도 고민해야될 내용이 있을것입니다. (예: Data Pipeline) 그래도 도움이 되었으면 좋겠습니다. 긴 글 읽어주셔서 감사합니다.
 
-<< 글 시리즈 소개 >>
+{% include series.html title="무중단 DB 업그레이드" %}

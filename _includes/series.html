@@ -1,0 +1,14 @@
+{% assign series_posts = site.posts | where: "series", page.series | sort: "path" %}
+<nav class="series" aria-label="{{ include.title }} 시리즈">
+  <div class="series-title">{{ include.title }} 시리즈</div>
+  <ol class="series-list">
+    {% for post in series_posts %}
+    {% assign part_title = post.title | split: " - " | last %}
+    {% if post.url == page.url %}
+    <li class="current" aria-current="page">{{ part_title }}</li>
+    {% else %}
+    <li><a href="{{ post.url | relative_url }}">{{ part_title }}</a></li>
+    {% endif %}
+    {% endfor %}
+  </ol>
+</nav>

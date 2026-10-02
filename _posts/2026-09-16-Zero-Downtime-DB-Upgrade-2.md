@@ -6,6 +6,7 @@ categories: dev
 img-overlay: 0.1
 comments: true
 draft: true
+series: zero-downtime-db-upgrade
 ---
 
 # MySQL DB Upgrade
@@ -94,21 +95,19 @@ SELECT NOW(); -- ProxySQL 이 없었다면, 해당 연결의 timezone 이 +09:00
 
 이러한 문제를 방지하기 위해서, ProxySQL 은 session variable 을 SELECT 만 하더라도 해당 앞단 연결에 대해서는 Multiplexing 을 꺼버립니다. 그렇게 되면 해당 앞단 연결에 대해서는 하나의 뒷단 연결을 독점으로 배정해주게 됩니다. 이 외에도 Multiplexing 이 disable 되는 조건들이 있기에, 개발환경에서 ProxySQL 의 앞단 연결들이 Multiplexing 이 disable 되었는지, 되었다면 왜 되었는지 알아내고 그것들을 해결을 해줘야 됩니다. Multiplexing 정보를 보기 위해서는 ProxySQL 의 설정을 하고 `stats_mysql_query_digest` 를 보면 됩니다.
 
+```sql
+-- ProxySQL admin 에서 실행. 이 설정을 해야, processlist 에서 Multiplexing 관련 정보를 볼수 있다.
+UPDATE global_variables SET variable_value = 1 WHERE variable_name = 'mysql-show_processlist_extended';
+LOAD MYSQL VARIABLES TO RUNTIME;
 ```
--- 이 설정을 해야, processlist 에서 Multiplexing 관련 정보를 볼수 있다.
-update global_variables set variable_value=1 where variable_name = 'mysql-show_processlist_extended';
 
--- extended_info 에 JSON 형태로 적혀있다.
-select user, extended_info from stats_mysql_processlist
-
-#!/bin/bash
-while read -r a b
-do
-  echo $b | jq "{app: \"$a\",  MultiplexDisabled: .backends[0].conn.MultiplexDisabled, status: .backends[0].conn.status, auto_increment_delay_token: .backends[0].conn.auto_increment_delay_token}"
-done < test
-
-<< 위에 있는 bash + select 문을 하나의 명령어로 만들수 있나? 있으면 그걸로 하자>>
-
+```bash
+# extended_info 에 JSON 형태로 적혀있는 연결 정보를 연결마다 뽑아본다.
+mysql -u admin -padmin -h 127.0.0.1 -P6032 --batch --skip-column-names \
+  -e "SELECT user, extended_info FROM stats_mysql_processlist" |
+while read -r app info; do
+  echo "$info" | jq -c --arg app "$app" '{app: $app, MultiplexDisabled: .backends[0].conn.MultiplexDisabled, status: .backends[0].conn.status, auto_increment_delay_token: .backends[0].conn.auto_increment_delay_token}'
+done
 ```
 
 포트원의 경우, Multiplexing 이 disable 되는 경우가 크게 2개가 있었습니다.
@@ -125,7 +124,7 @@ done < test
 
 ### 2. MySQL Version 
 
-MySQL DB 연결 protocol 을 보면 DB 와 클라이언트 간의 handshake 단계에서 DB 는 자신의 버전을 알려주도록 되어있습니다. << MySQL protocol 에 해당 부분 링크 넣기 >> 그러다보니 ProxySQL 은 Client 와 연결을 맺을 때부터 MySQL 의 버전을 알려줘야 하기 때문에, 자신의 뒷단에 있는 DB 들의 버전을 가지고 와서 넘겨준다거나 하는 동작을 하기가 힘듭니다. 따라서 [ProxySQL 설정](https://proxysql.com/documentation/global-variables/mysql-variables/#mysql-server_version)에는 클라이언트 에게 알려줄 버전을 설정해주도록 하였습니다. 포트원에서는 5.5 를 8.0 으로 옮기는 업그레이드이고, 모든 프로그램들이 그렇듯 DB 역시 Backward compatibility 를 지키려고 하기 때문에 ProxySQL 에 설정하는 버전은 5.5 로 두는것이 안전합니다.
+MySQL DB 연결 protocol 을 보면 DB 와 클라이언트 간의 handshake 단계에서 DB 는 자신의 버전을 알려주도록 되어있습니다. ([MySQL Protocol - Initial Handshake Packet](https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_handshake_v10.html) 의 `server version`) 그러다보니 ProxySQL 은 Client 와 연결을 맺을 때부터 MySQL 의 버전을 알려줘야 하기 때문에, 자신의 뒷단에 있는 DB 들의 버전을 가지고 와서 넘겨준다거나 하는 동작을 하기가 힘듭니다. 따라서 [ProxySQL 설정](https://proxysql.com/documentation/global-variables/mysql-variables/#mysql-server_version)에는 클라이언트 에게 알려줄 버전을 설정해주도록 하였습니다. 포트원에서는 5.5 를 8.0 으로 옮기는 업그레이드이고, 모든 프로그램들이 그렇듯 DB 역시 Backward compatibility 를 지키려고 하기 때문에 ProxySQL 에 설정하는 버전은 5.5 로 두는것이 안전합니다.
 
 그렇다는건, 클라이언트 입장에서는 5.5 라고 생각하며 query 를 날리는 데, 이것이 뒷단의 8.0 DB 에 전달이 될수 있다는 것이고, 이 때문에 8.0 에 생긴 breaking changes 에 영향을 받을수 밖에 없습니다. 문제가 된 변경들은 다음과 같습니다. 
 
@@ -141,83 +140,15 @@ MySQL DB 연결 protocol 을 보면 DB 와 클라이언트 간의 handshake 단�
 <details markdown="block">
 <summary>mysql_query_rules</summary>
 
-<< mysql_query_rules을 차라리 테이블 형태로 보기 쉽게 만들어서 보여주자... >>
+모든 rule 은 `active = 1` 입니다. `-` 는 NULL 입니다.
 
-```sql
-INSERT INTO mysql_query_rules (
-    rule_id,
-    active,
-    flagIN,
-    match_digest,
-    match_pattern,
-    flagOUT,
-    replace_pattern,
-    multiplex,
-    apply,
-    comment
-)
-VALUES
-(
-    1,
-    1,
-    0,
-    '^SELECT @@session.auto_increment_increment AS auto_increment_increment,@@character_set_client AS character_set_client.*',
-    '@@query_cache_size AS query_cache_size, @@query_cache_type AS query_cache_type',
-    10,
-    '0 AS query_cache_size, ''OFF'' AS query_cache_type',
-    2,
-    0,
-    'for multiplexing & mysql 8.0 backend'
-),
-(
-    2,
-    1,
-    0,
-    '^SELECT @@session.autocommit',
-    NULL,
-    NULL,
-    NULL,
-    2,
-    1,
-    'for multiplexing'
-),
-(
-    3,
-    1,
-    0,
-    '^SELECT @@session.tx_isolation',
-    '@@session.tx_isolation',
-    NULL,
-    '''REPEATABLE-READ'' as ''@@session.tx_isolation''',
-    2,
-    1,
-    'for multiplexing & mysql 8.0 backend'
-),
-(
-    4,
-    1,
-    0,
-    '^SELECT @@tx_isolation AS i,@@innodb_lock_wait_timeout AS l,@@version_comment AS v',
-    '@@tx_isolation',
-    NULL,
-    '''REPEATABLE-READ''',
-    2,
-    1,
-    'for multiplexing & mysql 8.0 backend'
-),
-(
-    5,
-    1,
-    10,
-    '^SELECT @@session.auto_increment_increment AS auto_increment_increment,@@character_set_client AS character_set_client.*',
-    '@@tx_isolation',
-    NULL,
-    '''REPEATABLE-READ''',
-    2,
-    1,
-    'for multiplexing & mysql 8.0 backends. this is chain rule from rule 1.'
-);
-```
+| rule_id | flagIN | match_digest | match_pattern | replace_pattern | flagOUT | multiplex | apply | comment |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 0 | `^SELECT @@session.auto_increment_increment AS auto_increment_increment,@@character_set_client AS character_set_client.*` | `@@query_cache_size AS query_cache_size, @@query_cache_type AS query_cache_type` | `0 AS query_cache_size, 'OFF' AS query_cache_type` | 10 | 2 | 0 | for multiplexing & mysql 8.0 backend |
+| 2 | 0 | `^SELECT @@session.autocommit` | - | - | - | 2 | 1 | for multiplexing |
+| 3 | 0 | `^SELECT @@session.tx_isolation` | `@@session.tx_isolation` | `'REPEATABLE-READ' as '@@session.tx_isolation'` | - | 2 | 1 | for multiplexing & mysql 8.0 backend |
+| 4 | 0 | `^SELECT @@tx_isolation AS i,@@innodb_lock_wait_timeout AS l,@@version_comment AS v` | `@@tx_isolation` | `'REPEATABLE-READ'` | - | 2 | 1 | for multiplexing & mysql 8.0 backend |
+| 5 | 10 | `^SELECT @@session.auto_increment_increment AS auto_increment_increment,@@character_set_client AS character_set_client.*` | `@@tx_isolation` | `'REPEATABLE-READ'` | - | 2 | 1 | for multiplexing & mysql 8.0 backends. this is chain rule from rule 1. |
 
 </details>
 
@@ -248,18 +179,23 @@ Switchover 실행 전에, 3초가 실제로 가능한지 알아보기 위해서 
 
 ### 결론: SwitchOver 과정
 
-<< 이거 실제 ~/work/v1core-db-switchover-test/db-switchover script 보면서 수정하기. 현재 적은건 psql 버전임 >>
+실제 Switchover 스크립트의 과정은 다음과 같습니다.
 
-1. PgBouncer PAUSE        ← 클라이언트 쿼리 대기 시작
-2. switchover marker 삽입    ← 구 DB의 switchover_marker 테이블에 행 삽입
-3. 복제 랙 0 대기         ← 구 DB → 신 DB 복제 완료 확인 (pg_current_wal_lsn(), confirmed_flush_lsn)
-4. switchover marker 확인    ← 신 DB에 marker 행이 복제됐는지 폴링
-5. 시퀀스 동기화
-6. PgBouncer 설정 교체    ← symlink 변경 + RELOAD
-7. PgBouncer RESUME       ← 클라이언트 트래픽 신 DB로 유입
-8. 전환 후 검증
+1. 이전 DB 를 `OFFLINE_SOFT` 로 변경 ← draining 시작. 새로운 transaction 은 대기
+2. 타임아웃 안에서 아래 조건들이 모두 만족될 때까지 polling
+   - ProxySQL 에서 이전 DB 로의 뒷단 연결 수가 0 (`stats_mysql_connection_pool` 의 `ConnUsed + ConnFree`)
+   - 이전 DB 의 processlist 에 서버 어플리케이션의 연결이 없음
+   - 이전 DB 의 `show master status` 의 Position 과 새로운 DB 의 `show slave status` 의 `Read_Master_Log_Pos`, `Exec_Master_Log_Pos` 가 모두 같음
+3. 성공하면, 새로운 DB 를 `ONLINE` 으로 변경 ← 대기하던 transaction 들이 새로운 DB 로 전달됨
+4. 타임아웃이 지나거나 에러가 나면, 이전 DB 를 다시 `ONLINE` 으로 변경 ← 롤백
 
-1~4 까지 5초 이상 걸리면 롤백
+ProxySQL 의 상태 변경은 ProxySQL admin 에서 다음과 같은 query 로 합니다.
+
+```sql
+UPDATE mysql_servers SET status = 'OFFLINE_SOFT' WHERE hostname = '<old db>';
+LOAD MYSQL SERVERS TO RUNTIME;
+SAVE MYSQL SERVERS TO DISK;
+```
 
 << visualization 추가하기 >>
 
@@ -289,4 +225,4 @@ ProxySQL Mirroring 은 아니지만 개발자가 만들어주신 benchmark 를 �
 
 MySQL 의 경우, 버전 간의 변경사항들이 많아 새 버전에 대해 테스트를 상당히 많이 진행해야 됬습니다. 그렇기에 DB Proxy 인 ProxySQL 이 지원하는 기능들도 많아 DB 업그레이드에 사용하기에 편했습니다. QA, 벤치마크 등등 수많은 테스트와 모의 실험들을 통해 문제가 될만한 부분들을 지워나갔었고, 그 덕분에 실제 DB 업그레이드에서는 문제없이 진행되었습니다.
 
-<< 글 시리즈 소개 >>
+{% include series.html title="무중단 DB 업그레이드" %}

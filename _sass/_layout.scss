@@ -475,3 +475,45 @@
     font-weight: 100;
     letter-spacing: 5px;
 }
+
+
+/**
+ * Series
+ */
+
+.series {
+    margin: $spacing-unit 0 0;
+    font-size: $base-font-size;
+    line-height: 1.8;
+
+    .series-title {
+        margin-bottom: 8px;
+        color: $grey-color;
+    }
+
+    .series-list {
+        margin: 0;
+        list-style: none;
+
+        li {
+            margin: 0;
+            padding-left: 14px;
+            border-left: 4px solid $grey-color-light;
+            color: $grey-color;
+        }
+
+        li.current {
+            border-left-color: $dev-color;
+            color: $dev-color;
+        }
+
+        a {
+            color: $grey-color;
+            text-decoration: none;
+
+            &:hover {
+                color: $text-color;
+            }
+        }
+    }
+}

@@ -248,6 +248,13 @@ table {
     border-collapse: collapse;
 }
 
+// 넓은 markdown table 은 page 대신 table 안에서 가로 스크롤
+.post-content table:not([class]):not(.table-equal-col-2 table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
 th, td {
     border-bottom: 1px solid $grey-color-light;
     border-right: 1px solid $grey-color-light;
