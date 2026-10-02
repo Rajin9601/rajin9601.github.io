@@ -121,7 +121,7 @@
   </div>
   <p class="mpx-caption" data-mpx="caption"></p>
 
-  <svg viewBox="0 0 760 290" role="img" aria-label="ProxySQL multiplexing 과 session variable 문제">
+  <svg viewBox="0 0 760 290" role="img" aria-label="ProxySQL multiplexing 과 user variable 문제">
     <!-- links: proxy -> backend connections -->
     <path class="link" data-mpx="lp0" d="M376 144 C 396 144, 400 59, 415 59"></path>
     <path class="link" data-mpx="lp1" d="M376 144 L 415 144"></path>
@@ -172,7 +172,7 @@
     <!-- db -->
     <rect class="box box-db" x="630" y="100" width="122" height="90" rx="10"></rect>
     <text class="t-title" x="691" y="140" text-anchor="middle">MySQL DB</text>
-    <text class="t-sub" x="691" y="160" text-anchor="middle">기본 UTC</text>
+    <text class="t-sub" x="691" y="160" text-anchor="middle">@order_id 없음</text>
   </svg>
 
   <table class="mpx-table">
@@ -180,9 +180,9 @@
       <tr><th style="width:52%">앞단 연결에서 보낸 query</th><th style="width:16%">간 곳</th><th>결과</th></tr>
     </thead>
     <tbody>
-      <tr data-mpx="r0"><td><code>SELECT @@session.time_zone;</code></td><td class="mpx-conn" data-mpx="r0c"></td><td class="mpx-res" data-mpx="r0v"></td></tr>
-      <tr data-mpx="r1"><td><code>SET SESSION time_zone = '+09:00';</code></td><td class="mpx-conn" data-mpx="r1c"></td><td class="mpx-res" data-mpx="r1v"></td></tr>
-      <tr data-mpx="r2"><td><code>SELECT NOW();</code></td><td class="mpx-conn" data-mpx="r2c"></td><td class="mpx-res" data-mpx="r2v"></td></tr>
+      <tr data-mpx="r0"><td><code>SELECT @order_id;</code></td><td class="mpx-conn" data-mpx="r0c"></td><td class="mpx-res" data-mpx="r0v"></td></tr>
+      <tr data-mpx="r1"><td><code>SET @order_id = 123;</code></td><td class="mpx-conn" data-mpx="r1c"></td><td class="mpx-res" data-mpx="r1v"></td></tr>
+      <tr data-mpx="r2"><td><code>SELECT * FROM orders WHERE id = @order_id;</code></td><td class="mpx-conn" data-mpx="r2c"></td><td class="mpx-res" data-mpx="r2v"></td></tr>
     </tbody>
   </table>
 
@@ -204,8 +204,8 @@
   var root = document.getElementById('mpx1');
   if (!root) return;
 
-  var UTC = 'time_zone = UTC';
-  var KST = 'time_zone = +09:00';
+  var UNSET = '@order_id = NULL';
+  var SET = '@order_id = 123';
   var SPREAD = ['query 마다', '뒷단 연결을 배정'];
   var OWNED = ['앞단 연결 하나에', '뒷단 연결을 독점 배정'];
 
@@ -213,37 +213,37 @@
     on: {
       caption: '<b>가정</b> — 앞단 연결의 Multiplexing 이 끝까지 켜져 있다면',
       steps: [
-        { mx: true, tz: [UTC, UTC, UTC], act: null, note: SPREAD, rows: [null, null, null], now: -1,
+        { mx: true, tz: [UNSET, UNSET, UNSET], act: null, note: SPREAD, rows: [null, null, null], now: -1,
           title: '시작',
-          desc: '앞단 연결은 하나지만, Multiplexing 이 켜져 있으면 ProxySQL 은 <b>query 마다 뒷단 연결을 골라서</b> 보냅니다. 지금 뒷단 연결 A, B, C 는 모두 DB 기본값인 UTC 입니다.' },
-        { mx: true, tz: [UTC, UTC, UTC], act: 0, note: SPREAD, rows: [['연결 A', 'UTC', ''], null, null], now: 0,
-          title: '① 현재 timezone 조회',
-          desc: '첫 query 가 <b>뒷단 연결 A</b> 로 갔습니다. A 의 timezone 은 DB 기본값이라 UTC 가 돌아옵니다.' },
-        { mx: true, tz: [UTC, KST, UTC], act: 1, note: SPREAD, rows: [['연결 A', 'UTC', ''], ['연결 B', 'OK', ''], null], now: 1,
-          title: '② timezone 변경',
-          desc: '두번째 query 는 <b>뒷단 연결 B</b> 로 갔습니다. 그래서 <b>연결 B 의 timezone 만</b> +09:00 으로 바뀝니다. A 와 C 는 그대로 UTC 입니다.' },
-        { mx: true, tz: [UTC, KST, UTC], act: 2, note: SPREAD, tone: 'bad',
-          rows: [['연결 A', 'UTC', ''], ['연결 B', 'OK', ''], ['연결 C', '2026-09-28 00:12:00', 'bad']], now: 2,
-          title: '③ 현재 시각 조회',
-          desc: '세번째 query 는 <b>뒷단 연결 C</b> 로 갔습니다. C 의 timezone 은 UTC 라서 UTC 시각이 돌아옵니다. <b>ProxySQL 이 없었다면 한국 시간이 나왔어야 합니다.</b>' }
+          desc: '앞단 연결은 하나지만, Multiplexing 이 켜져 있으면 ProxySQL 은 <b>query 마다 뒷단 연결을 골라서</b> 보냅니다. user variable 은 DB 연결마다 따로 저장되고, 지금 뒷단 연결 A, B, C 에는 <code>@order_id</code> 가 없습니다.' },
+        { mx: true, tz: [UNSET, UNSET, UNSET], act: 0, note: SPREAD, rows: [['연결 A', 'NULL', ''], null, null], now: 0,
+          title: '① user variable 조회',
+          desc: '첫 query 가 <b>뒷단 연결 A</b> 로 갔습니다. A 에는 아직 <code>@order_id</code> 가 없어서 NULL 이 돌아옵니다.' },
+        { mx: true, tz: [UNSET, SET, UNSET], act: 1, note: SPREAD, rows: [['연결 A', 'NULL', ''], ['연결 B', 'OK', ''], null], now: 1,
+          title: '② user variable 저장',
+          desc: '두번째 query 는 <b>뒷단 연결 B</b> 로 갔습니다. 그래서 <b>연결 B 에만</b> <code>@order_id = 123</code> 이 저장됩니다. A 와 C 에는 여전히 없습니다.' },
+        { mx: true, tz: [UNSET, SET, UNSET], act: 2, note: SPREAD, tone: 'bad',
+          rows: [['연결 A', 'NULL', ''], ['연결 B', 'OK', ''], ['연결 C', '0 rows', 'bad']], now: 2,
+          title: '③ user variable 로 조회',
+          desc: '세번째 query 는 <b>뒷단 연결 C</b> 로 갔습니다. C 에서는 <code>@order_id</code> 가 NULL 이라서 아무 row 도 나오지 않습니다. <b>ProxySQL 이 없었다면 id 가 123 인 주문이 나왔어야 합니다.</b>' }
       ]
     },
     def: {
-      caption: '<b>실제</b> — ProxySQL 기본 설정. session variable 을 보기만 해도 그 앞단 연결의 Multiplexing 을 끕니다',
+      caption: '<b>실제</b> — ProxySQL 기본 설정. <code>@</code> 가 들어간 query 가 오기만 해도 그 앞단 연결의 Multiplexing 을 끕니다',
       steps: [
-        { mx: true, tz: [UTC, UTC, UTC], act: null, note: SPREAD, rows: [null, null, null], now: -1,
+        { mx: true, tz: [UNSET, UNSET, UNSET], act: null, note: SPREAD, rows: [null, null, null], now: -1,
           title: '시작',
-          desc: '여기까지는 같습니다. 아직 session variable 을 쓰는 query 가 오지 않았기 때문에 Multiplexing 은 켜져 있습니다.' },
-        { mx: false, own: 0, tz: [UTC, UTC, UTC], act: 0, note: OWNED, rows: [['연결 A', 'UTC', ''], null, null], now: 0,
-          title: '① 현재 timezone 조회',
-          desc: '첫 query 가 <b>뒷단 연결 A</b> 로 갑니다. ProxySQL 은 이 query 가 session variable 을 읽는다는 것을 알기 때문에, <b>이 앞단 연결의 Multiplexing 을 끄고 연결 A 를 독점으로 배정합니다.</b>' },
-        { mx: false, own: 0, tz: [KST, UTC, UTC], act: 0, note: OWNED, rows: [['연결 A', 'UTC', ''], ['연결 A', 'OK', ''], null], now: 1,
-          title: '② timezone 변경',
-          desc: '두번째 query 도 <b>같은 연결 A</b> 로 갑니다. 그래서 timezone 변경이 이 앞단 연결이 쓰는 바로 그 뒷단 연결에 적용됩니다.' },
-        { mx: false, own: 0, tz: [KST, UTC, UTC], act: 0, note: OWNED, tone: 'good',
-          rows: [['연결 A', 'UTC', ''], ['연결 A', 'OK', ''], ['연결 A', '2026-09-28 09:12:00', 'good']], now: 2,
-          title: '③ 현재 시각 조회',
-          desc: '세번째 query 도 <b>같은 연결 A</b> 로 가서, ProxySQL 이 없을 때와 똑같이 한국 시간이 나옵니다. 대신 이 뒷단 연결은 앞단 연결이 사라질 때까지 묶여 있어서, <b>Switchover 때 draining 이 되지 않습니다.</b>' }
+          desc: '여기까지는 같습니다. 아직 <code>@</code> 가 들어간 query 가 오지 않았기 때문에 Multiplexing 은 켜져 있습니다.' },
+        { mx: false, own: 0, tz: [UNSET, UNSET, UNSET], act: 0, note: OWNED, rows: [['연결 A', 'NULL', ''], null, null], now: 0,
+          title: '① user variable 조회',
+          desc: '첫 query 가 <b>뒷단 연결 A</b> 로 갑니다. ProxySQL 은 query 에 <code>@</code> 가 들어 있어서 user variable 을 쓴다는 것을 알기 때문에, <b>이 앞단 연결의 Multiplexing 을 끄고 연결 A 를 독점으로 배정합니다.</b>' },
+        { mx: false, own: 0, tz: [SET, UNSET, UNSET], act: 0, note: OWNED, rows: [['연결 A', 'NULL', ''], ['연결 A', 'OK', ''], null], now: 1,
+          title: '② user variable 저장',
+          desc: '두번째 query 도 <b>같은 연결 A</b> 로 갑니다. 그래서 <code>@order_id = 123</code> 이 이 앞단 연결이 쓰는 바로 그 뒷단 연결에 저장됩니다.' },
+        { mx: false, own: 0, tz: [SET, UNSET, UNSET], act: 0, note: OWNED, tone: 'good',
+          rows: [['연결 A', 'NULL', ''], ['연결 A', 'OK', ''], ['연결 A', '1 row (id = 123)', 'good']], now: 2,
+          title: '③ user variable 로 조회',
+          desc: '세번째 query 도 <b>같은 연결 A</b> 로 가서, ProxySQL 이 없을 때와 똑같이 id 가 123 인 주문이 나옵니다. 대신 이 뒷단 연결은 앞단 연결이 사라질 때까지 묶여 있어서, <b>Switchover 때 draining 이 되지 않습니다.</b>' }
       ]
     }
   };
@@ -297,7 +297,7 @@
       var muted = owned && n !== s.own;
       el['c' + n].setAttribute('class', 'chip' + (on ? ' ' + flow : '') + (muted ? ' dim' : ''));
       el['c' + n + 'v'].textContent = s.tz[n];
-      el['c' + n + 'v'].setAttribute('fill', s.tz[n] === UTC ? '#6b7076' : '#2B8728');
+      el['c' + n + 'v'].setAttribute('fill', s.tz[n] === UNSET ? '#6b7076' : '#2B8728');
       el['lp' + n].setAttribute('class', 'link ' + (on ? flow : (muted ? 'dim' : '')));
       el['ld' + n].setAttribute('class', 'link ' + (on ? flow : (muted ? 'dim' : '')));
 
@@ -307,7 +307,7 @@
       el['r' + n + 'c'].style.color = r ? (owned ? '#2B8728' : '#2563eb') : '#9aa0a6';
       el['r' + n + 'v'].className = 'mpx-res' + (r && r[2] ? ' ' + r[2] : '');
       if (r && r[2] === 'bad') {
-        el['r' + n + 'v'].innerHTML = r[1] + '<small>기대한 값: 2026-09-28 09:12:00</small>';
+        el['r' + n + 'v'].innerHTML = r[1] + '<small>기대한 값: 1 row (id = 123)</small>';
       } else {
         el['r' + n + 'v'].textContent = r ? r[1] : '';
       }
