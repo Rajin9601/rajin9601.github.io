@@ -112,7 +112,7 @@ done
 
 포트원의 경우, Multiplexing 이 꺼지는 경우가 크게 2가지 있었습니다.
 
-첫 번째는 MySQL driver 의 query 였습니다. MySQL driver 가 연결을 맺을 때 해당 연결의 session variable 들을 읽어오면서 Multiplexing 이 꺼졌습니다. (예시: [mysql-connector-j](https://github.com/mysql/mysql-connector-j/blob/1c3f5c149e0bfe31c7fbeb24e2d260cd890972c4/src/main/core-impl/java/com/mysql/cj/NativeSession.java#L494-L503)) mysql-connector-j 에서는 session variable 들을 조회해서 그 값을 저장해놓고, 필요할 때 해당 값들을 메모리에서 읽어오고 있었습니다. 이 문제의 해결책은 "해당 값을 SELECT 만 했을 때는 Multiplexing 이 꺼지지 않도록 설정하는 것"입니다. 만약 누군가 값을 변경하면 Multiplexing 이 꺼지면서 해당 뒷단 연결은 변경한 앞단 연결에 독점 배정되고, 해당 앞단 연결이 사라지면 뒷단 연결도 사라집니다. 따라서 Multiplexing 이 가능한 뒷단 연결의 session variable 들은 모두 DB 의 연결 초기값일 것입니다. 즉, 독점 배정되지 않은 뒷단 연결들의 session variable 값은 모두 일치하기 때문에, SELECT 에 한해서는 Multiplexing 이 꺼지지 않아도 됩니다.
+첫 번째는 MySQL driver 의 query 였습니다. MySQL driver 가 연결을 맺을 때 해당 연결의 session variable 들을 읽어오면서 Multiplexing 이 꺼졌습니다. (예시: [mysql-connector-j](https://github.com/mysql/mysql-connector-j/blob/1c3f5c149e0bfe31c7fbeb24e2d260cd890972c4/src/main/core-impl/java/com/mysql/cj/NativeSession.java#L494-L503)) mysql-connector-j 에서는 session variable 들을 조회해서 그 값을 저장해놓고, 필요할 때 해당 값들을 메모리에서 읽어오고 있었습니다. 이 문제의 해결책은 "해당 값을 SELECT 만 했을 때는 Multiplexing 이 꺼지지 않도록 설정하는 것"입니다. 만약 누군가 값을 변경하면 Multiplexing 이 꺼지면서 해당 뒷단 연결은 변경한 앞단 연결에 독점 배정되고, 해당 앞단 연결이 사라지면 뒷단 연결도 사라집니다.[^2] 따라서 Multiplexing 이 가능한 뒷단 연결의 session variable 들은 모두 DB 의 연결 초기값일 것입니다. 즉, 독점 배정되지 않은 뒷단 연결들의 session variable 값은 모두 일치하기 때문에, SELECT 에 한해서는 Multiplexing 이 꺼지지 않아도 됩니다.
 
 {% include viz/multiplexing-select.html %}
 
@@ -226,5 +226,7 @@ ProxySQL Mirroring 은 아니지만, 개발자분이 만들어주신 benchmark �
 MySQL 의 경우, 버전 간의 변경사항들이 많아 새 버전에 대한 테스트를 상당히 많이 진행해야 했습니다. 대신 DB Proxy 인 ProxySQL 이 지원하는 기능들도 많아 DB 업그레이드에 사용하기에 편했습니다. QA, 벤치마크 등 수많은 테스트와 모의 실험을 통해 문제가 될 만한 부분들을 지워 나갔고, 그 덕분에 실제 DB 업그레이드는 문제없이 진행되었습니다.
 
 [^1]: 예외로 `SELECT @@tx_isolation`, `SELECT @@version` 은 많은 애플리케이션이 연결마다 실행하는 query 이기 때문에, Multiplexing 이 꺼지지 않도록 하드코딩되어 있습니다. ([ProxySQL 문서](https://proxysql.com/documentation/multiplexing/))
+
+[^2]: 정확하게는 앞단 연결이 사라지면, 뒷단 연결은 닫히거나 COM_CHANGE_USER 로 연결 상태가 초기화된 후에야 pool 로 돌아갑니다.
 
 {% include series.html title="무중단 DB 업그레이드" %}
